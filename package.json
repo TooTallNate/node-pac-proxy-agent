@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/TooTallNate/node-pac-proxy-agent",
   "dependencies": {
+    "agent-base": "~1.0.1",
     "pac-resolver": "~0.0.2",
     "proxy-agent": "~1.0.0"
   }
