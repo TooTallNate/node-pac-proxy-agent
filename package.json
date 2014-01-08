@@ -1,7 +1,7 @@
 {
   "name": "pac-proxy-agent",
   "version": "0.0.0",
-  "description": "A PAC file proxy `http.Agent` implementation",
+  "description": "A PAC file proxy `http.Agent` implementation for HTTP",
   "main": "index.js",
   "scripts": {
     "test": "mocha --reporter spec"
