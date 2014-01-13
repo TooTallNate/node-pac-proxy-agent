@@ -88,6 +88,7 @@ PacProxyAgent.prototype.loadResolver = function (fn) {
   function onPacFile (err, code) {
     if (err) {
       if ('ENOTMODIFIED' == err.code) {
+        debug('got ENOTMODIFIED response, reusing previous proxy resolver');
         fn(null, self._resolver);
       } else {
         fn(err);
@@ -96,7 +97,7 @@ PacProxyAgent.prototype.loadResolver = function (fn) {
     }
 
     // cache the resolver
-    //console.log(code);
+    debug('creating new proxy resolver instance');
     self._resolver = new PacResolver(code);
     fn(null, self._resolver);
   }
@@ -113,6 +114,9 @@ PacProxyAgent.prototype.loadResolver = function (fn) {
  */
 
 PacProxyAgent.prototype.loadPacFile = function (fn) {
+  debug('loading PAC file: %j', this.uri);
+  var self = this;
+
   if (this.code) {
     // code was directly passed in
     fn(null, this.code);
@@ -127,12 +131,15 @@ PacProxyAgent.prototype.loadPacFile = function (fn) {
 
   function onstream (err, rs) {
     if (err) return fn(err);
+    debug('got stream.Readable instance for URI');
+    self.cache = rs;
     toArray(rs, onarray);
   }
 
   function onarray (err, arr) {
     if (err) return fn(err);
     var buf = Buffer.concat(arr);
+    debug('read %d byte PAC file from URI', buf.length);
     fn(null, buf.toString('utf8'));
   }
 };
