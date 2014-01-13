@@ -3,6 +3,8 @@
  * Module dependencies.
  */
 
+var net = require('net');
+var tls = require('tls');
 var parse = require('url').parse;
 var format = require('url').format;
 var extend = require('extend');
@@ -178,15 +180,28 @@ function connect (req, opts, fn) {
 
     // XXX: right now, only the first proxy specified will be used
     var first = proxies[0];
+    debug('using proxy: "%s"', first);
+
     var parts = first.split(/\s+/);
     var type = parts[0];
+    var agent;
 
     if ('DIRECT' == type) {
       // direct connection to the destionation endpoint
+      var socket;
+      if (self.secureEndpoint) {
+        socket = tls.connect(opts);
+      } else {
+        socket = net.connect(opts);
+      }
+      return fn(null, socket);
     } else if ('PROXY' == type) {
       // use an HTTP proxy
+      agent = ProxyAgent('http://' + parts[1], self.secureEndpoint);
     } else if ('SOCKS' == type) {
       // use a SOCKS proxy
+      agent = ProxyAgent('socks://' + parts[1], self.secureEndpoint);
     }
+    if (agent) agent.callback(req, opts, fn);
   }
 }
