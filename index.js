@@ -175,11 +175,19 @@ function connect (req, opts, fn) {
     // calculate the `url` parameter
     var secure = self.secureEndpoint;
     var defaultPort = secure ? 443 : 80;
+    var path = req.path;
+    var firstQuestion = path.indexOf('?');
+    var search;
+    if (-1 != firstQuestion) {
+      search = path.substring(firstQuestion);
+      path = path.substring(0, firstQuestion);
+    }
     url = format(extend({}, opts, {
       protocol: secure ? 'https:' : 'http:',
-      pathname: req.path,
+      pathname: path,
+      search: search,
 
-      // XXX: need to use `hostname` instead of `host` otherwise `port` is not used
+      // XXX: need to use `hostname` instead of `host` otherwise `port` is ignored
       hostname: opts.host,
       host: null,
 
