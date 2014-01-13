@@ -168,13 +168,18 @@ function connect (req, opts, fn) {
     if (err) return fn(err);
 
     // calculate the `url` parameter
+    var secure = self.secureEndpoint;
+    var defaultPort = secure ? 443 : 80;
     url = format(extend({}, opts, {
-      protocol: self.secureEndpoint ? 'https:' : 'http:',
+      protocol: secure ? 'https:' : 'http:',
       pathname: req.path,
 
       // XXX: need to use `hostname` instead of `host` otherwise `port` is not used
       hostname: opts.host,
-      host: null
+      host: null,
+
+      // set `port` to null when it is the protocol default port (80 / 443)
+      port: defaultPort == opts.port ? null : opts.port
     }));
 
     // calculate the `host` parameter
