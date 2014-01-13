@@ -30,7 +30,10 @@
     "agent-base": "~1.0.1",
     "extend": "~1.2.1",
     "pac-resolver": "~0.0.2",
-    "proxy-agent": "~1.0.0"
+    "proxy-agent": "~1.0.0",
+    "get-uri": "~0.1.0",
+    "stream-to-array": "~1.0.0",
+    "debug": "~0.7.4"
   },
   "devDependencies": {
     "mocha": "~1.16.2"
