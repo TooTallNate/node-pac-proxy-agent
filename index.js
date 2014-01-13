@@ -154,14 +154,14 @@ function connect (req, opts, fn) {
   function onresolver (err, FindProxyForURL) {
     if (err) return fn(err);
 
-    // XXX: need to use `hostname` instead of `host` otherwise `port` is not used
-    opts.hostname = opts.host;
-    delete opts.host;
-
     // calculate the `url` parameter
     url = format(extend({}, opts, {
       protocol: self.secureEndpoint ? 'https:' : 'http:',
-      pathname: req.path
+      pathname: req.path,
+
+      // XXX: need to use `hostname` instead of `host` otherwise `port` is not used
+      hostname: opts.host,
+      host: null
     }));
 
     // calculate the `host` parameter
