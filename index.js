@@ -56,6 +56,10 @@ function PacProxyAgent (opts) {
   if ('string' == typeof opts) {
     uri = opts;
   } else {
+    if (opts.path && !opts.pathname) {
+      opts.pathname = opts.path;
+    }
+    opts.slashes = true;
     uri = format(opts);
   }
   if (!uri) throw new Error('a PAC file location must be specified!');
