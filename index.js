@@ -65,8 +65,13 @@ function PacProxyAgent (opts) {
   if (!uri) throw new Error('a PAC file location must be specified!');
   Agent.call(this, connect);
 
+  // if `true`, then connect to the destination endpoint over TLS, defaults to `false`
+  this.secureEndpoint = Boolean(opts.secureEndpoint);
+
   // strip the "pac+" prefix
   this.uri = uri.replace(/^pac\+/i, '');
+
+  this.cache = this._resolver = null;
 
   /*
   if (opts.code) {
