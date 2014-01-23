@@ -127,17 +127,12 @@ PacProxyAgent.prototype.loadPacFile = function (fn) {
   debug('loading PAC file: %j', this.uri);
   var self = this;
 
-  if (this.code) {
-    // code was directly passed in
-    fn(null, this.code);
-  } else {
-    // delegate out to the `get-uri` module
-    var opts = {};
-    if (this.cache) {
-      opts.cache = this.cache;
-    }
-    getUri(this.uri, opts, onstream);
+  // delegate out to the `get-uri` module
+  var opts = {};
+  if (this.cache) {
+    opts.cache = this.cache;
   }
+  getUri(this.uri, opts, onstream);
 
   function onstream (err, rs) {
     if (err) return fn(err);
