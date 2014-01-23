@@ -94,6 +94,10 @@ inherits(PacProxyAgent, Agent);
 PacProxyAgent.prototype.loadResolver = function (fn) {
   var self = this;
 
+  // kick things off by attempting to (re)load the contents of the PAC file URI
+  this.loadPacFile(onPacFile);
+
+  // loadPacFile() callback function
   function onPacFile (err, code) {
     if (err) {
       if ('ENOTMODIFIED' == err.code) {
@@ -110,9 +114,6 @@ PacProxyAgent.prototype.loadResolver = function (fn) {
     self._resolver = new PacResolver(code);
     fn(null, self._resolver);
   }
-
-  // kick things off by checking if we need to regenerate the Resolver
-  this.loadPacFile(onPacFile);
 };
 
 /**
