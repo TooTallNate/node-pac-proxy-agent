@@ -5,6 +5,7 @@
 
 var net = require('net');
 var tls = require('tls');
+var crypto = require('crypto');
 var parse = require('url').parse;
 var format = require('url').format;
 var extend = require('extend');
@@ -100,12 +101,26 @@ PacProxyAgent.prototype.loadResolver = function (fn) {
       return;
     }
 
+    // create a sha1 hash of the JS code
+    var hash = crypto.createHash('sha1').update(code).digest('hex');
+
+    if (self._resolver && self._resolver.hash == hash) {
+      debug('same sha1 hash for code - contents have not changed, reusing previous proxy resolver');
+      fn(null, self._resolver);
+      return;
+    }
+
     // cache the resolver
     debug('creating new proxy resolver instance');
     self._resolver = new PacResolver(code, {
       filename: self.uri,
       sandbox: self.sandbox
     });
+
+    // store that sha1 hash on the resolver instance
+    // for future comparison purposes
+    self._resolver.hash = hash;
+
     fn(null, self._resolver);
   }
 };
