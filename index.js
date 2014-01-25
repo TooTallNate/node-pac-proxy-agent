@@ -111,7 +111,9 @@ PacProxyAgent.prototype.loadResolver = function (fn) {
 
     // cache the resolver
     debug('creating new proxy resolver instance');
-    self._resolver = new PacResolver(code);
+    self._resolver = new PacResolver(code, {
+      filename: self.uri
+    });
     fn(null, self._resolver);
   }
 };
