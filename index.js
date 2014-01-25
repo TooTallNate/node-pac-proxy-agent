@@ -44,9 +44,6 @@ Object.defineProperty(exports, 'protocols', {
  *   - "pac+http", "http" - refers to an HTTP endpoint
  *   - "pac+https", "https" - refers to an HTTPS endpoint
  *
- * Or you can pass the PAC file JS code directly as a `code` param in the options
- * object.
- *
  * @api public
  */
 
@@ -72,14 +69,6 @@ function PacProxyAgent (opts) {
   this.uri = uri.replace(/^pac\+/i, '');
 
   this.cache = this._resolver = null;
-
-  /*
-  if (opts.code) {
-    // the JS code was passed directly in
-    protocol = 'code';
-    this.code = opts.code;
-  }
-  */
 }
 inherits(PacProxyAgent, Agent);
 
