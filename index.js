@@ -68,6 +68,8 @@ function PacProxyAgent (opts) {
   // strip the "pac+" prefix
   this.uri = uri.replace(/^pac\+/i, '');
 
+  this.sandbox = opts.sandox;
+
   this.cache = this._resolver = null;
 }
 inherits(PacProxyAgent, Agent);
@@ -101,7 +103,8 @@ PacProxyAgent.prototype.loadResolver = function (fn) {
     // cache the resolver
     debug('creating new proxy resolver instance');
     self._resolver = new PacResolver(code, {
-      filename: self.uri
+      filename: self.uri,
+      sandbox: self.sandbox
     });
     fn(null, self._resolver);
   }
