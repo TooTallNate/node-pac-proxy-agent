@@ -84,10 +84,10 @@ PacProxyAgent.prototype.loadResolver = function (fn) {
   var self = this;
 
   // kick things off by attempting to (re)load the contents of the PAC file URI
-  this.loadPacFile(onPacFile);
+  this.loadPacFile(onpacfile);
 
   // loadPacFile() callback function
-  function onPacFile (err, code) {
+  function onpacfile (err, code) {
     if (err) {
       if ('ENOTMODIFIED' == err.code) {
         debug('got ENOTMODIFIED response, reusing previous proxy resolver');
