@@ -201,6 +201,10 @@ function connect (req, opts, fn) {
   // `FindProxyForURL()` callback function
   function onproxy (err, proxy) {
     if (err) return fn(err);
+
+    // default to "DIRECT" if a falsey value was returned (or nothing)
+    if (!proxy) proxy = 'DIRECT';
+
     var proxies = proxy.split(/;\s*?\b/);
 
     // XXX: right now, only the first proxy specified will be used
