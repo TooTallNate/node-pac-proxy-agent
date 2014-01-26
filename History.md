@@ -1,4 +1,13 @@
 
+0.1.0 / 2014-01-25
+==================
+
+  * index: calculate an SHA1 hash of the JS code
+  * index: pass the `sandbox` option in to PacResolver
+  * index: remove final remnants of the `code` property
+  * index: set the `filename` option when creating the resolver function
+  * package: update to "pac-resolver" v1.1.0
+
 0.0.2 / 2014-01-25
 ==================
 
