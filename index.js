@@ -225,7 +225,7 @@ function connect (req, opts, fn) {
     var agent;
 
     if ('DIRECT' == type) {
-      // direct connection to the destionation endpoint
+      // direct connection to the destination endpoint
       var socket;
       if (self.secureEndpoint) {
         socket = tls.connect(opts);
