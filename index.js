@@ -192,7 +192,7 @@ function connect (req, opts, fn) {
       pathname: path,
       search: search,
 
-      // XXX: need to use `hostname` instead of `host` otherwise `port` is ignored
+      // need to use `hostname` instead of `host` otherwise `port` is ignored
       hostname: opts.host,
       host: null,
 
