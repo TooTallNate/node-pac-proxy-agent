@@ -1,5 +1,26 @@
 
 /**
+ * Module exports.
+ *
+ * XXX: exports going first here so that the circular require with
+ *      `proxy-agent` doesn't result in an empty `exports` object for
+ *      this module when `proxy-agent` requires us.
+ */
+
+module.exports = exports = PacProxyAgent;
+
+/**
+ * Supported "protocols". Delegates out to the `get-uri` module.
+ */
+
+var getUri = require('get-uri');
+Object.defineProperty(exports, 'protocols', {
+  enumerable: true,
+  configurable: true,
+  get: function () { return Object.keys(getUri.protocols); }
+});
+
+/**
  * Module dependencies.
  */
 
@@ -9,29 +30,12 @@ var crypto = require('crypto');
 var parse = require('url').parse;
 var format = require('url').format;
 var extend = require('extend');
-var getUri = require('get-uri');
 var Agent = require('agent-base');
 var ProxyAgent = require('proxy-agent');
 var PacResolver = require('pac-resolver');
 var toArray = require('stream-to-array');
 var inherits = require('util').inherits;
 var debug = require('debug')('pac-proxy-agent');
-
-/**
- * Module exports.
- */
-
-module.exports = exports = PacProxyAgent;
-
-/**
- * Supported "protocols". Delegates out to the `get-uri` module.
- */
-
-Object.defineProperty(exports, 'protocols', {
-  enumerable: true,
-  configurable: true,
-  get: function () { return Object.keys(getUri.protocols); }
-});
 
 /**
  * The `PacProxyAgent` class.
