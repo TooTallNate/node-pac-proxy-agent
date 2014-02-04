@@ -214,7 +214,7 @@ function connect (req, opts, fn) {
     // default to "DIRECT" if a falsey value was returned (or nothing)
     if (!proxy) proxy = 'DIRECT';
 
-    var proxies = proxy.split(/;\s*?\b/);
+    var proxies = String(proxy).trim().split(/\b\s*;\s*?\b/);
 
     // XXX: right now, only the first proxy specified will be used
     var first = proxies[0];
