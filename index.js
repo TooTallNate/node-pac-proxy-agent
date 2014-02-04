@@ -220,14 +220,15 @@ function connect (req, opts, fn) {
     var first = proxies[0];
     debug('using proxy: "%s"', first);
 
-    var parts = first.split(/\s+/);
-    var type = parts[0];
     var agent;
+    var type = parts[0];
+    var parts = first.split(/\s+/);
+    var secure = self.secureEndpoint;
 
     if ('DIRECT' == type) {
       // direct connection to the destination endpoint
       var socket;
-      if (self.secureEndpoint) {
+      if (secure) {
         socket = tls.connect(opts);
       } else {
         socket = net.connect(opts);
@@ -235,10 +236,10 @@ function connect (req, opts, fn) {
       return fn(null, socket);
     } else if ('PROXY' == type) {
       // use an HTTP proxy
-      agent = ProxyAgent('http://' + parts[1], self.secureEndpoint);
+      agent = ProxyAgent('http://' + parts[1], secure);
     } else if ('SOCKS' == type) {
       // use a SOCKS proxy
-      agent = ProxyAgent('socks://' + parts[1], self.secureEndpoint);
+      agent = ProxyAgent('socks://' + parts[1], secure);
     }
     if (agent) agent.callback(req, opts, fn);
   }
