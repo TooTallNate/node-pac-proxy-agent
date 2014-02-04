@@ -221,8 +221,8 @@ function connect (req, opts, fn) {
     debug('using proxy: "%s"', first);
 
     var agent;
-    var type = parts[0];
     var parts = first.split(/\s+/);
+    var type = parts[0];
     var secure = self.secureEndpoint;
 
     if ('DIRECT' == type) {
