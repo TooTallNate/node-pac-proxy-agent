@@ -1,4 +1,11 @@
 
+0.1.1 / 2014-02-03
+==================
+
+  * index: move the exports before the `require()` calls
+  * index: minor code cleanup
+  * index: better proxy string splitting logic
+
 0.1.0 / 2014-01-25
 ==================
 
