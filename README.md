@@ -1,11 +1,12 @@
 pac-proxy-agent
 ===============
-### A PAC file proxy `http.Agent` implementation for HTTP and HTTPS
+### A [PAC file][pac-wikipedia] proxy `http.Agent` implementation for HTTP and HTTPS
 [![Build Status](https://travis-ci.org/TooTallNate/node-pac-proxy-agent.png?branch=master)](https://travis-ci.org/TooTallNate/node-pac-proxy-agent)
 
 This module provides an `http.Agent` implementation that retreives the specified
-PAC proxy file and uses it to resolve which HTTP, HTTPS, or SOCKS proxy, or if a
-direct connection should be used to connect to the HTTP endpoint.
+[PAC proxy file][pac-wikipedia] and uses it to resolve which HTTP, HTTPS, or
+SOCKS proxy, or if a direct connection should be used to connect to the
+HTTP endpoint.
 
 It is designed to be be used with the built-in `http` and `https` modules.
 
