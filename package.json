@@ -29,7 +29,7 @@
   "dependencies": {
     "agent-base": "~1.0.1",
     "extend": "~1.2.1",
-    "pac-resolver": "~1.1.0",
+    "pac-resolver": "~1.2.0",
     "proxy-agent": "1",
     "get-uri": "~0.1.0",
     "stream-to-array": "~1.0.0",
