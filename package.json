@@ -33,7 +33,7 @@
     "proxy-agent": "1",
     "get-uri": "~0.1.0",
     "stream-to-array": "~1.0.0",
-    "debug": "~0.8.0"
+    "debug": "~1.0.0"
   },
   "devDependencies": {
     "mocha": "~1.16.2"
