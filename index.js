@@ -243,6 +243,7 @@ function connect (req, opts, fn) {
       agent = ProxyAgent('http://' + parts[1], secure);
     } else if ('HTTPS' == type) {
       // use an HTTPS proxy
+      // http://dev.chromium.org/developers/design-documents/secure-web-proxy
       agent = ProxyAgent('https://' + parts[1], secure);
     } else if ('SOCKS' == type) {
       // use a SOCKS proxy
