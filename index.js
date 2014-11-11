@@ -241,9 +241,14 @@ function connect (req, opts, fn) {
     } else if ('PROXY' == type) {
       // use an HTTP proxy
       agent = ProxyAgent('http://' + parts[1], secure);
+    } else if ('HTTPS' == type) {
+      // use an HTTPS proxy
+      agent = ProxyAgent('https://' + parts[1], secure);
     } else if ('SOCKS' == type) {
       // use a SOCKS proxy
       agent = ProxyAgent('socks://' + parts[1], secure);
+    } else {
+      throw new Error('Unknown proxy type: ' + type);
     }
     if (agent) agent.callback(req, opts, fn);
   }
