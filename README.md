@@ -1,7 +1,7 @@
 pac-proxy-agent
 ===============
 ### A [PAC file][pac-wikipedia] proxy `http.Agent` implementation for HTTP and HTTPS
-[![Build Status](https://travis-ci.org/TooTallNate/node-pac-proxy-agent.png?branch=master)](https://travis-ci.org/TooTallNate/node-pac-proxy-agent)
+[![Build Status](https://travis-ci.org/TooTallNate/node-pac-proxy-agent.svg?branch=master)](https://travis-ci.org/TooTallNate/node-pac-proxy-agent)
 
 This module provides an `http.Agent` implementation that retreives the specified
 [PAC proxy file][pac-wikipedia] and uses it to resolve which HTTP, HTTPS, or
