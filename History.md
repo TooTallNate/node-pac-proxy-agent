@@ -2,10 +2,10 @@
 0.2.0 / 2014-11-10
 ==================
 
- * index: add reference link for Chrome's "HTTPS" support
- * index: throw an error for unknown proxy types (#2, @michaelansel)
- * index: support HTTPS proxies (#2, @michaelansel)
- * package: allow any "debug" v2
+  * index: add reference link for Chrome's "HTTPS" support
+  * index: throw an error for unknown proxy types (#2, @michaelansel)
+  * index: support HTTPS proxies (#2, @michaelansel)
+  * package: allow any "debug" v2
 
 0.1.2 / 2014-04-04
 ==================
