@@ -36,6 +36,6 @@
     "debug": "2"
   },
   "devDependencies": {
-    "mocha": "~1.16.2"
+    "mocha": "2"
   }
 }
