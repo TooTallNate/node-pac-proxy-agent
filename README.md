@@ -43,7 +43,7 @@ var agent = new PacProxyAgent(proxy);
 opts.agent = agent;
 
 http.get(opts, function (res) {
-  console.log('response" event!', res.headers);
+  console.log('"response" event!', res.headers);
   res.pipe(process.stdout);
 });
 ```
