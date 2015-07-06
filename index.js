@@ -137,7 +137,7 @@ PacProxyAgent.prototype.loadResolver = function (fn) {
  */
 
 PacProxyAgent.prototype.loadPacFile = function (fn) {
-  debug('loading PAC file: %j', this.uri);
+  debug('loading PAC file: %o', this.uri);
   var self = this;
 
   // delegate out to the `get-uri` module
@@ -157,7 +157,7 @@ PacProxyAgent.prototype.loadPacFile = function (fn) {
   function onarray (err, arr) {
     if (err) return fn(err);
     var buf = Buffer.concat(arr);
-    debug('read %d byte PAC file from URI', buf.length);
+    debug('read %o byte PAC file from URI', buf.length);
     fn(null, buf.toString('utf8'));
   }
 };
@@ -207,7 +207,7 @@ function connect (req, opts, fn) {
     // calculate the `host` parameter
     host = parse(url).hostname;
 
-    debug('url: %j, host: %j', url, host);
+    debug('url: %o, host: %o', url, host);
     FindProxyForURL(url, host, onproxy);
   }
 
@@ -222,7 +222,7 @@ function connect (req, opts, fn) {
 
     // XXX: right now, only the first proxy specified will be used
     var first = proxies[0];
-    debug('using proxy: "%s"', first);
+    debug('using proxy: %o', first);
 
     var agent;
     var parts = first.split(/\s+/);
