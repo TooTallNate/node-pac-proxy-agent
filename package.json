@@ -31,7 +31,7 @@
     "extend": "~1.2.1",
     "pac-resolver": "~1.2.1",
     "proxy-agent": "1",
-    "get-uri": "~0.1.0",
+    "get-uri": "1",
     "stream-to-array": "~1.0.0",
     "debug": "2"
   },
