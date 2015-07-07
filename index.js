@@ -1,10 +1,6 @@
 
 /**
  * Module exports.
- *
- * XXX: exports going first here so that the circular require with
- *      `proxy-agent` doesn't result in an empty `exports` object for
- *      this module when `proxy-agent` requires us.
  */
 
 module.exports = exports = PacProxyAgent;
@@ -31,7 +27,9 @@ var parse = require('url').parse;
 var format = require('url').format;
 var extend = require('extend');
 var Agent = require('agent-base');
-var ProxyAgent = require('proxy-agent');
+var HttpProxyAgent = require('http-proxy-agent');
+var HttpsProxyAgent = require('https-proxy-agent');
+var SocksProxyAgent = require('socks-proxy-agent');
 var PacResolver = require('pac-resolver');
 var toArray = require('stream-to-array');
 var inherits = require('util').inherits;
@@ -52,19 +50,29 @@ var debug = require('debug')('pac-proxy-agent');
  * @api public
  */
 
-function PacProxyAgent (opts) {
-  if (!(this instanceof PacProxyAgent)) return new PacProxyAgent(opts);
-  var uri;
-  if ('string' == typeof opts) {
-    uri = opts;
-  } else {
-    if (opts.path && !opts.pathname) {
-      opts.pathname = opts.path;
+function PacProxyAgent (uri, opts) {
+  if (!(this instanceof PacProxyAgent)) return new PacProxyAgent(uri, opts);
+
+  // was an options object passed in first?
+  if ('object' === typeof uri) {
+    opts = uri;
+
+    // result of a url.parse() call?
+    if (opts.href) {
+      if (opts.path && !opts.pathname) {
+        opts.pathname = opts.path;
+      }
+      opts.slashes = true;
+      uri = format(opts);
+    } else {
+      uri = opts.uri;
     }
-    opts.slashes = true;
-    uri = format(opts);
   }
-  if (!uri) throw new Error('a PAC file location must be specified!');
+  if (!opts) opts = {};
+
+  if (!uri) throw new Error('a PAC file URI must be specified!');
+  debug('creating PacProxyAgent with URI %o and options %o', uri, opts);
+
   Agent.call(this, connect);
 
   // if `true`, then connect to the destination endpoint over TLS, defaults to `false`
@@ -74,6 +82,8 @@ function PacProxyAgent (opts) {
   this.uri = uri.replace(/^pac\+/i, '');
 
   this.sandbox = opts.sandox;
+
+  this.proxy = opts;
 
   this.cache = this._resolver = null;
 }
@@ -218,7 +228,7 @@ function connect (req, opts, fn) {
     // default to "DIRECT" if a falsey value was returned (or nothing)
     if (!proxy) proxy = 'DIRECT';
 
-    var proxies = String(proxy).trim().split(/\b\s*;\s*?\b/);
+    var proxies = String(proxy).trim().split(/\s*;\s*/g).filter(Boolean);
 
     // XXX: right now, only the first proxy specified will be used
     var first = proxies[0];
@@ -238,16 +248,19 @@ function connect (req, opts, fn) {
         socket = net.connect(opts);
       }
       return fn(null, socket);
-    } else if ('PROXY' == type) {
-      // use an HTTP proxy
-      agent = ProxyAgent('http://' + parts[1], secure);
-    } else if ('HTTPS' == type) {
-      // use an HTTPS proxy
-      // http://dev.chromium.org/developers/design-documents/secure-web-proxy
-      agent = ProxyAgent('https://' + parts[1], secure);
     } else if ('SOCKS' == type) {
       // use a SOCKS proxy
-      agent = ProxyAgent('socks://' + parts[1], secure);
+      agent = new SocksProxyAgent('socks://' + parts[1], secure);
+    } else if ('PROXY' == type || 'HTTPS' == type) {
+      // use an HTTP or HTTPS proxy
+      // http://dev.chromium.org/developers/design-documents/secure-web-proxy
+      var proxyURL = ('HTTPS' === type ? 'https' : 'http') + '://' + parts[1];
+      var proxy = extend({}, self.proxy, parse(proxyURL));
+      if (secure) {
+        agent = new HttpsProxyAgent(proxy);
+      } else {
+        agent = new HttpProxyAgent(proxy);
+      }
     } else {
       throw new Error('Unknown proxy type: ' + type);
     }
