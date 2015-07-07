@@ -8,6 +8,7 @@ var url = require('url');
 var http = require('http');
 var https = require('https');
 var assert = require('assert');
+var toBuffer = require('stream-to-buffer');
 var Proxy = require('proxy');
 var socks = require('socksv5');
 var PacProxyAgent = require('../');
@@ -156,13 +157,9 @@ describe('PacProxyAgent', function () {
       opts.agent = agent;
 
       var req = http.get(opts, function (res) {
-        var data = '';
-        res.setEncoding('utf8');
-        res.on('data', function (b) {
-          data += b;
-        });
-        res.on('end', function () {
-          data = JSON.parse(data);
+        toBuffer(res, function (err, buf) {
+          if (err) return done(err);
+          var data = JSON.parse(buf.toString('utf8'));
           assert.equal('127.0.0.1:' + httpPort, data.host);
           assert('via' in data);
           done();
@@ -189,13 +186,9 @@ describe('PacProxyAgent', function () {
       opts.agent = agent;
 
       var req = http.get(opts, function (res) {
-        var data = '';
-        res.setEncoding('utf8');
-        res.on('data', function (b) {
-          data += b;
-        });
-        res.on('end', function () {
-          data = JSON.parse(data);
+        toBuffer(res, function (err, buf) {
+          if (err) return done(err);
+          var data = JSON.parse(buf.toString('utf8'));
           assert.equal('127.0.0.1:' + httpPort, data.host);
           assert('via' in data);
           done();
@@ -220,13 +213,9 @@ describe('PacProxyAgent', function () {
       opts.agent = agent;
 
       var req = http.get(opts, function (res) {
-        var data = '';
-        res.setEncoding('utf8');
-        res.on('data', function (b) {
-          data += b;
-        });
-        res.on('end', function () {
-          data = JSON.parse(data);
+        toBuffer(res, function (err, buf) {
+          if (err) return done(err);
+          var data = JSON.parse(buf.toString('utf8'));
           assert.equal('127.0.0.1:' + httpPort, data.host);
           done();
         });
