@@ -38,6 +38,8 @@
     "stream-to-array": "~1.0.0"
   },
   "devDependencies": {
-    "mocha": "2"
+    "mocha": "2",
+    "proxy": "0.2.3",
+    "socksv5": "0.0.6"
   }
 }
