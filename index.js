@@ -75,9 +75,6 @@ function PacProxyAgent (uri, opts) {
 
   Agent.call(this, connect);
 
-  // if `true`, then connect to the destination endpoint over TLS, defaults to `false`
-  this.secureEndpoint = Boolean(opts.secureEndpoint);
-
   // strip the "pac+" prefix
   this.uri = uri.replace(/^pac\+/i, '');
 
@@ -181,6 +178,7 @@ function connect (req, opts, fn) {
   var url;
   var host;
   var self = this;
+  var secure = Boolean(opts.secureEndpoint);
 
   // first we need get a generated FindProxyForURL() function,
   // either cached or retreived from the source
@@ -191,7 +189,6 @@ function connect (req, opts, fn) {
     if (err) return fn(err);
 
     // calculate the `url` parameter
-    var secure = self.secureEndpoint;
     var defaultPort = secure ? 443 : 80;
     var path = req.path;
     var firstQuestion = path.indexOf('?');
@@ -236,7 +233,6 @@ function connect (req, opts, fn) {
     var agent;
     var parts = first.split(/\s+/);
     var type = parts[0];
-    var secure = self.secureEndpoint;
 
     if ('DIRECT' == type) {
       // direct connection to the destination endpoint
@@ -249,7 +245,7 @@ function connect (req, opts, fn) {
       return fn(null, socket);
     } else if ('SOCKS' == type) {
       // use a SOCKS proxy
-      agent = new SocksProxyAgent('socks://' + parts[1], secure);
+      agent = new SocksProxyAgent('socks://' + parts[1]);
     } else if ('PROXY' == type || 'HTTPS' == type) {
       // use an HTTP or HTTPS proxy
       // http://dev.chromium.org/developers/design-documents/secure-web-proxy

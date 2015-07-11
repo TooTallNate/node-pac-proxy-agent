@@ -115,40 +115,15 @@ describe('PacProxyAgent', function () {
     it('should accept a "string" proxy argument', function () {
       var agent = new PacProxyAgent('pac+ftp://example.com/proxy.pac');
       assert.equal('ftp://example.com/proxy.pac', agent.uri);
-      assert.equal(false, agent.secureEndpoint);
     });
     it('should accept a `url.parse()` result object argument', function () {
       var opts = url.parse('pac+ftp://example.com/proxy.pac');
       var agent = new PacProxyAgent(opts);
       assert.equal('ftp://example.com/proxy.pac', agent.uri);
-      assert.equal(false, agent.secureEndpoint);
     });
     it('should accept a `uri` on the options object', function () {
       var agent = new PacProxyAgent({ uri: 'pac+ftp://example.com/proxy.pac' });
       assert.equal('ftp://example.com/proxy.pac', agent.uri);
-      assert.equal(false, agent.secureEndpoint);
-    });
-    describe('secureEndpoint', function () {
-      it('should default to `false`', function () {
-        var opts = url.parse('ftp://example.com/proxy.pac');
-        var agent = new PacProxyAgent(opts);
-        assert.equal('ftp://example.com/proxy.pac', agent.uri);
-        assert.equal(false, agent.secureEndpoint);
-      });
-      it('should be `true` when passed in as a parse() option', function () {
-        var opts = url.parse('ftp://example.com/proxy.pac');
-        opts.secureEndpoint = true;
-        var agent = new PacProxyAgent(opts);
-        assert.equal('ftp://example.com/proxy.pac', agent.uri);
-        assert.equal(true, agent.secureEndpoint);
-      });
-      it('should be `true` when passed in as an option', function () {
-        var agent = new PacProxyAgent('ftp://example.com/proxy.pac', {
-          secureEndpoint: true
-        });
-        assert.equal('ftp://example.com/proxy.pac', agent.uri);
-        assert.equal(true, agent.secureEndpoint);
-      });
     });
   });
 
@@ -249,7 +224,7 @@ describe('PacProxyAgent', function () {
       }
 
       var uri = 'data:,' + encodeURIComponent(FindProxyForURL.toString().replace('PORT', proxyPort));
-      var agent = new PacProxyAgent(uri, { secureEndpoint: true });
+      var agent = new PacProxyAgent(uri);
 
       var opts = url.parse('https://127.0.0.1:' + httpsPort + '/test');
       opts.agent = agent;
@@ -279,7 +254,6 @@ describe('PacProxyAgent', function () {
 
       var uri = 'data:,' + encodeURIComponent(FindProxyForURL.toString().replace('PORT', proxyHttpsPort));
       var agent = new PacProxyAgent(uri, {
-        secureEndpoint: true,
         rejectUnauthorized: false
       });
 
@@ -311,7 +285,7 @@ describe('PacProxyAgent', function () {
       }
 
       var uri = 'data:,' + encodeURIComponent(FindProxyForURL.toString().replace('PORT', socksPort));
-      var agent = new PacProxyAgent(uri, { secureEndpoint: true });
+      var agent = new PacProxyAgent(uri);
 
       var opts = url.parse('https://127.0.0.1:' + httpsPort + '/test');
       opts.agent = agent;

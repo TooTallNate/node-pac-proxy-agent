@@ -27,15 +27,15 @@
   },
   "homepage": "https://github.com/TooTallNate/node-pac-proxy-agent",
   "dependencies": {
-    "agent-base": "~1.0.1",
+    "agent-base": "2",
     "debug": "2",
     "extend": "3",
     "get-uri": "1",
-    "http-proxy-agent": "^0.2.6",
-    "https-proxy-agent": "^0.3.5",
+    "http-proxy-agent": "1",
+    "https-proxy-agent": "1",
     "pac-resolver": "~1.2.1",
-    "socks-proxy-agent": "^1.0.2",
-    "stream-to-buffer": "^0.1.0"
+    "socks-proxy-agent": "2",
+    "stream-to-buffer": "0.1.0"
   },
   "devDependencies": {
     "mocha": "2",
