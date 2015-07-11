@@ -1,4 +1,19 @@
 
+1.0.0 / 2015-07-10
+==================
+
+  * package: update "extend" to v3
+  * refactor to use proxy agent classes directly
+  * upgrade to `agent-base` v2 API
+  * use "stream-to-buffer"
+  * use %o formatter for debug() calls
+  * package: update "get-uri" to v1
+  * package: update "mocha" to v2
+  * travis: test node v0.8, v0.10, and v0.12
+  * test: add initial test cases
+  * test: add basic "https" module tests
+  * README: use SVG for Travis-CI badge
+
 0.2.0 / 2014-11-10
 ==================
 
