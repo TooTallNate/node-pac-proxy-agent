@@ -31,7 +31,7 @@ var HttpProxyAgent = require('http-proxy-agent');
 var HttpsProxyAgent = require('https-proxy-agent');
 var SocksProxyAgent = require('socks-proxy-agent');
 var PacResolver = require('pac-resolver');
-var toBuffer = require('stream-to-buffer');
+var getRawBody = require('raw-body');
 var inherits = require('util').inherits;
 var debug = require('debug')('pac-proxy-agent');
 
@@ -158,13 +158,13 @@ PacProxyAgent.prototype.loadPacFile = function (fn) {
     if (err) return fn(err);
     debug('got stream.Readable instance for URI');
     self.cache = rs;
-    toBuffer(rs, onbuffer);
+    getRawBody(rs, 'utf8', onbuffer);
   }
 
   function onbuffer (err, buf) {
     if (err) return fn(err);
     debug('read %o byte PAC file from URI', buf.length);
-    fn(null, buf.toString('utf8'));
+    fn(null, buf);
   }
 };
 
