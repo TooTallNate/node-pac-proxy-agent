@@ -12,6 +12,12 @@ var toBuffer = require('stream-to-buffer');
 var Proxy = require('proxy');
 var socks = require('socksv5');
 var PacProxyAgent = require('../');
+try {
+  var Kerberos = require('kerberos');
+} catch(er) {
+  Kerberos = null;
+}
+
 
 describe('PacProxyAgent', function () {
   // target servers
@@ -105,13 +111,7 @@ describe('PacProxyAgent', function () {
     proxyHttpsServer.close();
   });
 
-
   describe('constructor', function () {
-    it('should throw an Error if no "proxy" argument is given', function () {
-      assert.throws(function () {
-        new PacProxyAgent();
-      });
-    });
     it('should accept a "string" proxy argument', function () {
       var agent = new PacProxyAgent('pac+ftp://example.com/proxy.pac');
       assert.equal('ftp://example.com/proxy.pac', agent.uri);
@@ -210,6 +210,35 @@ describe('PacProxyAgent', function () {
       req.once('error', done);
     });
 
+    describe('autodetection', function() {
+      var tests = [
+	['should do proxy autodetection', function(done) {
+	  var agent = new PacProxyAgent();
+	  if(Kerberos) {
+	    agent.proxy.use_kerberos = 1;
+	  }
+	  var opts = url.parse('http://www.nodejs.org/');
+	  opts.agent = agent;
+
+	  var req = http.get(opts, function (res) {
+            toBuffer(res, function (err) {
+	      assert.equal(302, res.statusCode);
+              if (err) return done(err);
+              done();
+            });
+	  });
+	  req.once('error', done);
+	}]
+      ];
+
+      tests.forEach(function(test) {
+	if(process.env.USE_PROXY_AUTODETECT) {
+	  it(test[0], test[1]);
+	} else {
+	  it.skip(test[0], test[1]);
+	}
+      });
+    });
   });
 
 
