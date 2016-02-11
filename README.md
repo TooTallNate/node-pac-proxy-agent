@@ -46,6 +46,14 @@ http.get(opts, function (res) {
   console.log('"response" event!', res.headers);
   res.pipe(process.stdout);
 });
+
+// create an instance of the `PacProxyAgent` class that will do autodetection
+// via DNS of the PAC file.
+// See https://en.wikipedia.org/wiki/Web_Proxy_Autodiscovery_Protocol
+var agent = new PacProxyAgent();
+
+// To enable Kerberos auth of the proxy just set
+agent.proxy.use_kerberos = 1;
 ```
 
 

@@ -34,6 +34,7 @@ var PacResolver = require('pac-resolver');
 var toBuffer = require('stream-to-buffer');
 var inherits = require('util').inherits;
 var debug = require('debug')('pac-proxy-agent');
+var os = require('os');
 
 /**
  * The `PacProxyAgent` class.
@@ -70,13 +71,18 @@ function PacProxyAgent (uri, opts) {
   }
   if (!opts) opts = {};
 
-  if (!uri) throw new Error('a PAC file URI must be specified!');
-  debug('creating PacProxyAgent with URI %o and options %o', uri, opts);
+  if (!uri) {
+    this.autodetect_uri = true;
+  }
+
+  debug('creating PacProxyAgent with URI %o and options %o', uri || '(autodetect)', opts);
 
   Agent.call(this, connect);
 
   // strip the "pac+" prefix
-  this.uri = uri.replace(/^pac\+/i, '');
+  if (uri) {
+    this.uri = uri.replace(/^pac\+/i, '');
+  }
 
   this.sandbox = opts.sandbox;
 
@@ -131,7 +137,6 @@ PacProxyAgent.prototype.loadResolver = function (fn) {
     // store that sha1 hash on the resolver instance
     // for future comparison purposes
     self._resolver.hash = hash;
-
     fn(null, self._resolver);
   }
 };
@@ -144,14 +149,58 @@ PacProxyAgent.prototype.loadResolver = function (fn) {
  */
 
 PacProxyAgent.prototype.loadPacFile = function (fn) {
-  debug('loading PAC file: %o', this.uri);
+  debug('loading PAC file: %o', this.uri || 'autodetect');
   var self = this;
 
-  // delegate out to the `get-uri` module
   var opts = {};
   if (this.cache) {
     opts.cache = this.cache;
   }
+
+  if (!this.uri) {
+    var hostname = os.hostname();
+
+    var hostnameParts = hostname.split(".");
+    var attemptURIs = [];
+    while(hostnameParts.length >= 2) {
+      attemptURIs.push('http://wpad.' + hostnameParts.join(".") + '/wpad.dat');
+      hostnameParts.shift();
+    }
+
+    // Attempt to resolve these hostnames if they resolve then
+    // attempt pull the file.
+    var attemptIndex = 0;
+
+    getUri(attemptURIs[attemptIndex], opts, autodetect_onstream);
+
+    function autodetect_onerr() {
+      if(++attemptIndex > attemptURIs.length) {
+	console.log("last error");
+	fn("Was not able to autodetect PAC configuration");
+      } else {
+	getUri(attemptURIs[attemptIndex], opts, autodetect_onstream);
+      }
+    }
+
+    function autodetect_onbuffer (err, buf) {
+      if (err) {
+	return autodetect_onerr(err);
+      }
+      debug('read %o byte PAC file from URI %s', buf.length, self.autodetected_uri);
+      fn(null, buf.toString('utf8'));
+    }
+
+    function autodetect_onstream (err, rs) {
+      if (err) return autodetect_onerr(err);
+      debug('got stream.Readable instance for URI');
+      self.autodetected_uri = attemptURIs[attemptIndex];
+      self.cache = rs;
+      toBuffer(rs, autodetect_onbuffer);
+    }
+    return;
+  }
+
+  // delegate out to the `get-uri` module
   getUri(this.uri, opts, onstream);
 
   function onstream (err, rs) {
