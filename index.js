@@ -78,7 +78,7 @@ function PacProxyAgent (uri, opts) {
   // strip the "pac+" prefix
   this.uri = uri.replace(/^pac\+/i, '');
 
-  this.sandbox = opts.sandox;
+  this.sandbox = opts.sandbox;
 
   this.proxy = opts;
 
