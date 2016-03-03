@@ -104,6 +104,41 @@ describe('PacProxyAgent', function () {
     proxyHttpsServer.close();
   });
 
+  it('should allow a `sandbox` to be passed in', function (done) {
+    this.slow(1000);
+
+    function FindProxyForURL(url, host) {
+      throw new Error(foo() + bar());
+    }
+
+    function foo () {
+      return 'hi';
+    }
+
+    function asyncBar(fn) {
+      setTimeout(function () {
+        fn(null, 'fooooo');
+      }, 200);
+    }
+    asyncBar.async = true;
+
+    var uri = 'data:,' + encodeURIComponent(FindProxyForURL.toString());
+    var agent = new PacProxyAgent(uri, {
+      sandbox: {
+        foo: foo,
+        bar: asyncBar
+      }
+    });
+
+    var opts = url.parse('http://127.0.0.1:' + httpPort + '/test');
+    opts.agent = agent;
+
+    var req = http.get(opts);
+    req.once('error', function (err) {
+      assert.equal(err.message, 'hifooooo');
+      done();
+    });
+  });
 
   describe('constructor', function () {
     it('should throw an Error if no "proxy" argument is given', function () {
