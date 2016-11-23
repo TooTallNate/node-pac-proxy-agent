@@ -30,7 +30,7 @@
     "agent-base": "2",
     "debug": "2",
     "extend": "3",
-    "get-uri": "1",
+    "get-uri": "2",
     "http-proxy-agent": "1",
     "https-proxy-agent": "1",
     "pac-resolver": "~1.2.1",
