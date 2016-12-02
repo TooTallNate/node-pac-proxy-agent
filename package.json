@@ -35,7 +35,7 @@
     "https-proxy-agent": "1",
     "pac-resolver": "~1.2.1",
     "socks-proxy-agent": "2",
-    "stream-to-buffer": "0.1.0"
+    "raw-body": "2"
   },
   "devDependencies": {
     "mocha": "2",

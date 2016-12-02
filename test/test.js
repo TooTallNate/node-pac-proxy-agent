@@ -7,7 +7,7 @@ var url = require('url');
 var http = require('http');
 var https = require('https');
 var assert = require('assert');
-var toBuffer = require('stream-to-buffer');
+var getRawBody = require('raw-body');
 var Proxy = require('proxy');
 var socks = require('socksv5');
 var PacProxyAgent = require('../');
@@ -178,9 +178,9 @@ describe('PacProxyAgent', function () {
       opts.agent = agent;
 
       var req = http.get(opts, function (res) {
-        toBuffer(res, function (err, buf) {
+        getRawBody(res, 'utf8', function (err, buf) {
           if (err) return done(err);
-          var data = JSON.parse(buf.toString('utf8'));
+          var data = JSON.parse(buf);
           assert.equal('127.0.0.1:' + httpPort, data.host);
           assert('via' in data);
           done();
@@ -207,9 +207,9 @@ describe('PacProxyAgent', function () {
       opts.agent = agent;
 
       var req = http.get(opts, function (res) {
-        toBuffer(res, function (err, buf) {
+        getRawBody(res, 'utf8', function (err, buf) {
           if (err) return done(err);
-          var data = JSON.parse(buf.toString('utf8'));
+          var data = JSON.parse(buf);
           assert.equal('127.0.0.1:' + httpPort, data.host);
           assert('via' in data);
           done();
@@ -234,9 +234,9 @@ describe('PacProxyAgent', function () {
       opts.agent = agent;
 
       var req = http.get(opts, function (res) {
-        toBuffer(res, function (err, buf) {
+        getRawBody(res, 'utf8', function (err, buf) {
           if (err) return done(err);
-          var data = JSON.parse(buf.toString('utf8'));
+          var data = JSON.parse(buf);
           assert.equal('127.0.0.1:' + httpPort, data.host);
           done();
         });
@@ -265,9 +265,9 @@ describe('PacProxyAgent', function () {
       opts.rejectUnauthorized = false;
 
       var req = https.get(opts, function (res) {
-        toBuffer(res, function (err, buf) {
+        getRawBody(res, 'utf8', function (err, buf) {
           if (err) return done(err);
-          var data = JSON.parse(buf.toString('utf8'));
+          var data = JSON.parse(buf);
           assert.equal('127.0.0.1:' + httpsPort, data.host);
           done();
         });
@@ -296,9 +296,9 @@ describe('PacProxyAgent', function () {
       opts.rejectUnauthorized = false;
 
       var req = https.get(opts, function (res) {
-        toBuffer(res, function (err, buf) {
+        getRawBody(res, 'utf8', function (err, buf) {
           if (err) return done(err);
-          var data = JSON.parse(buf.toString('utf8'));
+          var data = JSON.parse(buf);
           assert.equal('127.0.0.1:' + httpsPort, data.host);
           assert(gotReq);
           done();
@@ -326,9 +326,9 @@ describe('PacProxyAgent', function () {
       opts.rejectUnauthorized = false;
 
       var req = https.get(opts, function (res) {
-        toBuffer(res, function (err, buf) {
+        getRawBody(res, 'utf8', function (err, buf) {
           if (err) return done(err);
-          var data = JSON.parse(buf.toString('utf8'));
+          var data = JSON.parse(buf);
           assert.equal('127.0.0.1:' + httpsPort, data.host);
           assert(gotReq);
           done();
