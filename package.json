@@ -33,7 +33,7 @@
     "get-uri": "2",
     "http-proxy-agent": "1",
     "https-proxy-agent": "1",
-    "pac-resolver": "~1.2.1",
+    "pac-resolver": "~2.0.0",
     "socks-proxy-agent": "2",
     "raw-body": "2"
   },
