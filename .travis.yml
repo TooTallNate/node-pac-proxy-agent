@@ -1,4 +1,4 @@
-judo: false
+sudo: false
 
 language: node_js
 
