@@ -250,6 +250,9 @@ function connect (req, opts, fn) {
       // http://dev.chromium.org/developers/design-documents/secure-web-proxy
       var proxyURL = ('HTTPS' === type ? 'https' : 'http') + '://' + parts[1];
       var proxy = extend({}, self.proxy, parse(proxyURL));
+      if(proxy.proxyAuthorization) {
+          proxy.auth = proxy.proxyAuthorization;
+      }
       if (secure) {
         agent = new HttpsProxyAgent(proxy);
       } else {
