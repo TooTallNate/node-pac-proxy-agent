@@ -1,4 +1,13 @@
 
+2.0.0 / 2017-06-13
+==================
+
+  * [BREAKING] drop support for Node < 4
+  * update "socks-proxy-agent" to v3
+  * use `Object.assign()`
+  * add 'use strict'
+  * update dependencies
+
 1.1.0 / 2017-06-11
 ==================
 
