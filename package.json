@@ -29,7 +29,6 @@
   "dependencies": {
     "agent-base": "^2.1.1",
     "debug": "^2.6.8",
-    "extend": "^3.0.1",
     "get-uri": "^2.0.0",
     "http-proxy-agent": "^1.0.0",
     "https-proxy-agent": "^1.0.0",
