@@ -244,6 +244,33 @@ describe('PacProxyAgent', function () {
       req.once('error', done);
     });
 
+    it('should work with user resolver', function (done) {
+      httpServer.once('request', function (req, res) {
+        res.end(JSON.stringify(req.headers));
+      });
+
+      function FindProxyForURL(url, host, cb) {
+        setTimeout(function () {
+          cb(null, "PROXY 127.0.0.1:" + proxyPort + ";");
+        }, 5);
+      }
+
+      var agent = new PacProxyAgent(FindProxyForURL);
+
+      var opts = url.parse('http://127.0.0.1:' + httpPort + '/test');
+      opts.agent = agent;
+
+      var req = http.get(opts, function (res) {
+        getRawBody(res, 'utf8', function (err, buf) {
+          if (err) return done(err);
+          var data = JSON.parse(buf);
+          assert.equal('127.0.0.1:' + httpPort, data.host);
+          assert('via' in data);
+          done();
+        });
+      });
+      req.once('error', done);
+    });
   });
 
 
@@ -331,6 +358,34 @@ describe('PacProxyAgent', function () {
           var data = JSON.parse(buf);
           assert.equal('127.0.0.1:' + httpsPort, data.host);
           assert(gotReq);
+          done();
+        });
+      });
+      req.once('error', done);
+    });
+
+    it('should work with user resolver', function (done) {
+      httpsServer.once('request', function (req, res) {
+        res.end(JSON.stringify(req.headers));
+      });
+
+      function FindProxyForURL(url, host, cb) {
+        setTimeout(function () {
+          cb(null, "PROXY 127.0.0.1:" + proxyPort + ";");
+        }, 5);
+      }
+
+      var agent = new PacProxyAgent(FindProxyForURL);
+
+      var opts = url.parse('https://127.0.0.1:' + httpsPort + '/test');
+      opts.agent = agent;
+      opts.rejectUnauthorized = false;
+
+      var req = https.get(opts, function (res) {
+        getRawBody(res, 'utf8', function (err, buf) {
+          if (err) return done(err);
+          var data = JSON.parse(buf);
+          assert.equal('127.0.0.1:' + httpsPort, data.host);
           done();
         });
       });

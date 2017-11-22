@@ -67,6 +67,10 @@ function PacProxyAgent (uri, opts) {
     } else {
       uri = opts.uri;
     }
+  } else if ('function' === typeof uri) {
+    // user directly passed a resolver
+    this._user_resolver = uri;
+    uri = 'dummy://';
   }
   if (!opts) opts = {};
 
@@ -180,9 +184,13 @@ function connect (req, opts, fn) {
   var self = this;
   var secure = Boolean(opts.secureEndpoint);
 
-  // first we need get a generated FindProxyForURL() function,
-  // either cached or retreived from the source
-  this.loadResolver(onresolver);
+  if (this._user_resolver) {
+    onresolver(null, this._user_resolver);
+  } else {
+    // first we need get a generated FindProxyForURL() function,
+    // either cached or retreived from the source
+    this.loadResolver(onresolver);
+  }
 
   // `loadResolver()` callback function
   function onresolver (err, FindProxyForURL) {
