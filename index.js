@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Module exports.
  */
@@ -24,7 +26,6 @@ var tls = require('tls');
 var crypto = require('crypto');
 var parse = require('url').parse;
 var format = require('url').format;
-var extend = require('extend');
 var Agent = require('agent-base');
 var HttpProxyAgent = require('http-proxy-agent');
 var HttpsProxyAgent = require('https-proxy-agent');
@@ -196,7 +197,7 @@ function connect (req, opts, fn) {
       search = path.substring(firstQuestion);
       path = path.substring(0, firstQuestion);
     }
-    url = format(extend({}, opts, {
+    url = format(Object.assign({}, opts, {
       protocol: secure ? 'https:' : 'http:',
       pathname: path,
       search: search,
@@ -249,7 +250,7 @@ function connect (req, opts, fn) {
       // use an HTTP or HTTPS proxy
       // http://dev.chromium.org/developers/design-documents/secure-web-proxy
       var proxyURL = ('HTTPS' === type ? 'https' : 'http') + '://' + parts[1];
-      var proxy = extend({}, self.proxy, parse(proxyURL));
+      var proxy = Object.assign({}, self.proxy, parse(proxyURL));
       if(proxy.proxyAuthorization) {
           proxy.auth = proxy.proxyAuthorization;
       }

@@ -1,4 +1,31 @@
 
+2.0.0 / 2017-06-13
+==================
+
+  * [BREAKING] drop support for Node < 4
+  * update "socks-proxy-agent" to v3
+  * use `Object.assign()`
+  * add 'use strict'
+  * update dependencies
+
+1.1.0 / 2017-06-11
+==================
+
+  * fix judo
+  * drop Node < 1 support, test v6, v7 and v8
+  * remove older versions from Travis
+  * update "mocha" to v3.4.2
+  * Upgrade pac-resolver
+  * Merge pull request #5 from piotr1212/use_raw_body
+  * Merge pull request #9 from shanebdavis/master
+  * updated get-uri dependency to 2.0; now builds nicely with webpack
+  * test: add a `sandbox` test case
+  * remote empty top lines
+  * travis: test node v1, 2, 3, 4, 5
+  * Merge pull request #6 from rustyconover/fix-sandbox-options
+  * Fix mispelling preventing the setting of sandbox in proxy creation
+  * update stream-to-buffer to raw-body, stream-to-buffer is deprecated
+
 1.0.0 / 2015-07-10
 ==================
 
