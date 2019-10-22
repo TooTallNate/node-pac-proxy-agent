@@ -48,6 +48,15 @@ http.get(opts, function (res) {
 });
 ```
 
+It is also possible to pass an asynchronous proxy resolver function directly:
+
+``` js
+var agent = new PacProxyAgent(function FindProxyForURL(url, host, cb) {
+  setTimeout(function () {
+    cb(null, "PROXY 127.0.0.1:8080;");
+  });
+});
+```
 
 License
 -------
