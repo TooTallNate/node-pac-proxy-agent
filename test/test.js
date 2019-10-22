@@ -135,7 +135,7 @@ describe('PacProxyAgent', function () {
       }
     });
 
-    var opts = url.parse('http://127.0.0.1:' + httpPort + '/test');
+    var opts = url.parse('http://localhost:' + httpPort + '/test');
     opts.agent = agent;
 
     var req = http.get(opts);
@@ -173,20 +173,20 @@ describe('PacProxyAgent', function () {
       });
 
       function FindProxyForURL(url, host) {
-        return "PROXY 127.0.0.1:PORT;"
+        return "PROXY localhost:PORT;"
       }
 
       var uri = 'data:,' + encodeURIComponent(FindProxyForURL.toString().replace('PORT', proxyPort));
       var agent = new PacProxyAgent(uri);
 
-      var opts = url.parse('http://127.0.0.1:' + httpPort + '/test');
+      var opts = url.parse('http://localhost:' + httpPort + '/test');
       opts.agent = agent;
 
       var req = http.get(opts, function (res) {
         getRawBody(res, 'utf8', function (err, buf) {
           if (err) return done(err);
           var data = JSON.parse(buf);
-          assert.equal('127.0.0.1:' + httpPort, data.host);
+          assert.equal('localhost:' + httpPort, data.host);
           assert('via' in data);
           done();
         });
@@ -200,7 +200,7 @@ describe('PacProxyAgent', function () {
       });
 
       function FindProxyForURL(url, host) {
-        return "HTTPS 127.0.0.1:PORT;"
+        return "HTTPS localhost:PORT;"
       }
 
       var uri = 'data:,' + encodeURIComponent(FindProxyForURL.toString().replace('PORT', proxyHttpsPort));
@@ -208,14 +208,14 @@ describe('PacProxyAgent', function () {
       proxy.rejectUnauthorized = false;
       var agent = new PacProxyAgent(proxy);
 
-      var opts = url.parse('http://127.0.0.1:' + httpPort + '/test');
+      var opts = url.parse('http://localhost:' + httpPort + '/test');
       opts.agent = agent;
 
       var req = http.get(opts, function (res) {
         getRawBody(res, 'utf8', function (err, buf) {
           if (err) return done(err);
           var data = JSON.parse(buf);
-          assert.equal('127.0.0.1:' + httpPort, data.host);
+          assert.equal('localhost:' + httpPort, data.host);
           assert('via' in data);
           done();
         });
@@ -229,20 +229,20 @@ describe('PacProxyAgent', function () {
       });
 
       function FindProxyForURL(url, host) {
-        return "SOCKS 127.0.0.1:PORT;"
+        return "SOCKS localhost:PORT;"
       }
 
       var uri = 'data:,' + encodeURIComponent(FindProxyForURL.toString().replace('PORT', socksPort));
       var agent = new PacProxyAgent(uri);
 
-      var opts = url.parse('http://127.0.0.1:' + httpPort + '/test');
+      var opts = url.parse('http://localhost:' + httpPort + '/test');
       opts.agent = agent;
 
       var req = http.get(opts, function (res) {
         getRawBody(res, 'utf8', function (err, buf) {
           if (err) return done(err);
           var data = JSON.parse(buf);
-          assert.equal('127.0.0.1:' + httpPort, data.host);
+          assert.equal('localhost:' + httpPort, data.host);
           done();
         });
       });
@@ -259,13 +259,13 @@ describe('PacProxyAgent', function () {
       });
 
       function FindProxyForURL(url, host) {
-        return "PROXY 127.0.0.1:PORT;"
+        return "PROXY localhost:PORT;"
       }
 
       var uri = 'data:,' + encodeURIComponent(FindProxyForURL.toString().replace('PORT', proxyPort));
       var agent = new PacProxyAgent(uri);
 
-      var opts = url.parse('https://127.0.0.1:' + httpsPort + '/test');
+      var opts = url.parse('https://localhost:' + httpsPort + '/test');
       opts.agent = agent;
       opts.rejectUnauthorized = false;
 
@@ -273,7 +273,7 @@ describe('PacProxyAgent', function () {
         getRawBody(res, 'utf8', function (err, buf) {
           if (err) return done(err);
           var data = JSON.parse(buf);
-          assert.equal('127.0.0.1:' + httpsPort, data.host);
+          assert.equal('localhost:' + httpsPort, data.host);
           done();
         });
       });
@@ -288,7 +288,7 @@ describe('PacProxyAgent', function () {
       });
 
       function FindProxyForURL(url, host) {
-        return "HTTPS 127.0.0.1:PORT;"
+        return "HTTPS localhost:PORT;"
       }
 
       var uri = 'data:,' + encodeURIComponent(FindProxyForURL.toString().replace('PORT', proxyHttpsPort));
@@ -296,7 +296,7 @@ describe('PacProxyAgent', function () {
         rejectUnauthorized: false
       });
 
-      var opts = url.parse('https://127.0.0.1:' + httpsPort + '/test');
+      var opts = url.parse('https://localhost:' + httpsPort + '/test');
       opts.agent = agent;
       opts.rejectUnauthorized = false;
 
@@ -304,7 +304,7 @@ describe('PacProxyAgent', function () {
         getRawBody(res, 'utf8', function (err, buf) {
           if (err) return done(err);
           var data = JSON.parse(buf);
-          assert.equal('127.0.0.1:' + httpsPort, data.host);
+          assert.equal('localhost:' + httpsPort, data.host);
           assert(gotReq);
           done();
         });
@@ -320,13 +320,13 @@ describe('PacProxyAgent', function () {
       });
 
       function FindProxyForURL(url, host) {
-        return "SOCKS 127.0.0.1:PORT;"
+        return "SOCKS localhost:PORT;"
       }
 
       var uri = 'data:,' + encodeURIComponent(FindProxyForURL.toString().replace('PORT', socksPort));
       var agent = new PacProxyAgent(uri);
 
-      var opts = url.parse('https://127.0.0.1:' + httpsPort + '/test');
+      var opts = url.parse('https://localhost:' + httpsPort + '/test');
       opts.agent = agent;
       opts.rejectUnauthorized = false;
 
@@ -334,7 +334,7 @@ describe('PacProxyAgent', function () {
         getRawBody(res, 'utf8', function (err, buf) {
           if (err) return done(err);
           var data = JSON.parse(buf);
-          assert.equal('127.0.0.1:' + httpsPort, data.host);
+          assert.equal('localhost:' + httpsPort, data.host);
           assert(gotReq);
           done();
         });
