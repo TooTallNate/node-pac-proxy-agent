@@ -238,6 +238,7 @@ function connect (req, opts, fn) {
       // direct connection to the destination endpoint
       var socket;
       if (secure) {
+        opts.servername = opts.servername || opts.host;
         socket = tls.connect(opts);
       } else {
         socket = net.connect(opts);
