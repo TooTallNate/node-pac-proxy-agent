@@ -9,6 +9,7 @@ var https = require('https');
 var assert = require('assert');
 var getRawBody = require('raw-body');
 var Proxy = require('proxy');
+var socks4 = require('socks4');
 var socks = require('socksv5');
 var PacProxyAgent = require('../');
 
@@ -19,6 +20,7 @@ describe('PacProxyAgent', function () {
 
   // proxy servers
   var socksServer, socksPort;
+  var socks4Server, socks4Port;
   var proxyServer, proxyPort;
   var proxyHttpsServer, proxyHttpsPort;
 
@@ -57,6 +59,15 @@ describe('PacProxyAgent', function () {
   });
 
   before(function (done) {
+    // setup SOCKSv4 proxy server
+    socks4Server = socks4.createServer();
+    socks4Server.listen(function () {
+      socks4Port = socks4Server.address().port;
+        done();
+    });
+  });
+
+  before(function (done) {
     // setup HTTP proxy server
     proxyServer = Proxy();
     proxyServer.listen(function () {
@@ -78,6 +89,11 @@ describe('PacProxyAgent', function () {
     });
   });
 
+
+  after(function (done) {
+    socks4Server.close();
+    done();
+  });
 
   after(function (done) {
     //socksServer.once('close', function () { done(); });
@@ -249,6 +265,58 @@ describe('PacProxyAgent', function () {
       req.once('error', done);
     });
 
+    it('should work over a SOCKS5 proxy', function (done) {
+      httpServer.once('request', function (req, res) {
+        res.end(JSON.stringify(req.headers));
+      });
+
+      function FindProxyForURL(url, host) {
+        return "SOCKS5 localhost:PORT;"
+      }
+
+      var uri = 'data:,' + encodeURIComponent(FindProxyForURL.toString().replace('PORT', socksPort));
+      var agent = new PacProxyAgent(uri);
+
+      var opts = url.parse('http://localhost:' + httpPort + '/test');
+      opts.agent = agent;
+
+      var req = http.get(opts, function (res) {
+        getRawBody(res, 'utf8', function (err, buf) {
+          if (err) return done(err);
+          var data = JSON.parse(buf);
+          assert.equal('localhost:' + httpPort, data.host);
+          done();
+        });
+      });
+      req.once('error', done);
+    });
+
+    it('should work over a SOCKS4 proxy', function (done) {
+      httpServer.once('request', function (req, res) {
+        res.end(JSON.stringify(req.headers));
+      });
+
+      function FindProxyForURL(url, host) {
+        return "SOCKS4 localhost:PORT;"
+      }
+
+      var uri = 'data:,' + encodeURIComponent(FindProxyForURL.toString().replace('PORT', socks4Port));
+      var agent = new PacProxyAgent(uri);
+
+      var opts = url.parse('http://localhost:' + httpPort + '/test');
+      opts.agent = agent;
+
+      var req = http.get(opts, function (res) {
+        getRawBody(res, 'utf8', function (err, buf) {
+          if (err) return done(err);
+          var data = JSON.parse(buf);
+          assert.equal('localhost:' + httpPort, data.host);
+          done();
+        });
+      });
+      req.once('error', done);
+    });
+
   });
 
 
@@ -324,6 +392,66 @@ describe('PacProxyAgent', function () {
       }
 
       var uri = 'data:,' + encodeURIComponent(FindProxyForURL.toString().replace('PORT', socksPort));
+      var agent = new PacProxyAgent(uri);
+
+      var opts = url.parse('https://localhost:' + httpsPort + '/test');
+      opts.agent = agent;
+      opts.rejectUnauthorized = false;
+
+      var req = https.get(opts, function (res) {
+        getRawBody(res, 'utf8', function (err, buf) {
+          if (err) return done(err);
+          var data = JSON.parse(buf);
+          assert.equal('localhost:' + httpsPort, data.host);
+          assert(gotReq);
+          done();
+        });
+      });
+      req.once('error', done);
+    });
+
+    it('should work over a SOCKS5 proxy', function (done) {
+      var gotReq = false;
+      httpsServer.once('request', function (req, res) {
+        gotReq = true;
+        res.end(JSON.stringify(req.headers));
+      });
+
+      function FindProxyForURL(url, host) {
+        return "SOCKS5 localhost:PORT;"
+      }
+
+      var uri = 'data:,' + encodeURIComponent(FindProxyForURL.toString().replace('PORT', socksPort));
+      var agent = new PacProxyAgent(uri);
+
+      var opts = url.parse('https://localhost:' + httpsPort + '/test');
+      opts.agent = agent;
+      opts.rejectUnauthorized = false;
+
+      var req = https.get(opts, function (res) {
+        getRawBody(res, 'utf8', function (err, buf) {
+          if (err) return done(err);
+          var data = JSON.parse(buf);
+          assert.equal('localhost:' + httpsPort, data.host);
+          assert(gotReq);
+          done();
+        });
+      });
+      req.once('error', done);
+    });
+
+    it('should work over a SOCKS4 proxy', function (done) {
+      var gotReq = false;
+      httpsServer.once('request', function (req, res) {
+        gotReq = true;
+        res.end(JSON.stringify(req.headers));
+      });
+
+      function FindProxyForURL(url, host) {
+        return "SOCKS4 localhost:PORT;"
+      }
+
+      var uri = 'data:,' + encodeURIComponent(FindProxyForURL.toString().replace('PORT', socks4Port));
       var agent = new PacProxyAgent(uri);
 
       var opts = url.parse('https://localhost:' + httpsPort + '/test');

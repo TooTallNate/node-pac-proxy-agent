@@ -243,9 +243,12 @@ function connect (req, opts, fn) {
         socket = net.connect(opts);
       }
       return fn(null, socket);
-    } else if ('SOCKS' == type) {
-      // use a SOCKS proxy
+    } else if ('SOCKS' == type || 'SOCKS5' == type) {
+      // use a SOCKSv5h proxy
       agent = new SocksProxyAgent('socks://' + parts[1]);
+    } else if ('SOCKS4' == type) {
+      // use a SOCKSv4a proxy
+      agent = new SocksProxyAgent('socks4a://' + parts[1]);
     } else if ('PROXY' == type || 'HTTPS' == type) {
       // use an HTTP or HTTPS proxy
       // http://dev.chromium.org/developers/design-documents/secure-web-proxy
