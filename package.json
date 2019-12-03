@@ -39,6 +39,7 @@
   "devDependencies": {
     "mocha": "6",
     "proxy": "^1.0.1",
-    "socksv5": "0.0.6"
+    "socksv5": "0.0.6",
+    "socks4": "0.1.1"
   }
 }
