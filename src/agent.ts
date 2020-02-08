@@ -134,10 +134,10 @@ export default class PacProxyAgent extends Agent {
 		const resolver = await this.loadResolver();
 
 		// Calculate the `url` parameter
-		var defaultPort = secureEndpoint ? 443 : 80;
-		var path = req.path;
-		var firstQuestion = path.indexOf('?');
-		var search;
+		let defaultPort = secureEndpoint ? 443 : 80;
+		let path = req.path;
+		let firstQuestion = path.indexOf('?');
+		let search;
 		if (firstQuestion === -1) {
 			search = path.substring(firstQuestion);
 			path = path.substring(0, firstQuestion);
@@ -146,7 +146,7 @@ export default class PacProxyAgent extends Agent {
 			...opts,
 			protocol: secureEndpoint ? 'https:' : 'http:',
 			pathname: path,
-			search: search,
+			search,
 
 			// need to use `hostname` instead of `host` otherwise `port` is ignored
 			hostname: opts.host,
@@ -157,43 +157,46 @@ export default class PacProxyAgent extends Agent {
 		});
 
 		// Calculate the `host` parameter
-		//const host = parse(url).hostname;
+		// const host = parse(url).hostname;
 
-		//debug('url: %o, host: %o', url, host);
+		// debug('url: %o, host: %o', url, host);
 		let proxy = await resolver(url);
-		//let proxy = await resolver(url, host);
+		// let proxy = await resolver(url, host);
 
 		// Default to "DIRECT" if a falsey value was returned (or nothing)
 		if (!proxy) {
 			proxy = 'DIRECT';
 		}
 
-		var proxies = String(proxy)
+		let proxies = String(proxy)
 			.trim()
 			.split(/\s*;\s*/g)
 			.filter(Boolean);
 
 		// XXX: right now, only the first proxy specified will be used
-		var first = proxies[0];
+		let first = proxies[0];
 		debug('using proxy: %o', first);
 
-		var parts = first.split(/\s+/);
-		var type = parts[0];
+		let parts = first.split(/\s+/);
+		let type = parts[0];
 
-		if ('DIRECT' == type) {
+		if (type == 'DIRECT') {
 			// direct connection to the destination endpoint
 			if (secureEndpoint) {
 				return tls.connect(opts);
 			}
 			return net.connect(opts);
-		} else if ('SOCKS' == type) {
+		}
+		if (type == 'SOCKS') {
 			// use a SOCKS proxy
-			return new SocksProxyAgent('socks://' + parts[1]);
-		} else if ('PROXY' == type || 'HTTPS' == type) {
+			return new SocksProxyAgent(`socks://${parts[1]}`);
+		}
+		if (type == 'PROXY' || type == 'HTTPS') {
 			// use an HTTP or HTTPS proxy
 			// http://dev.chromium.org/developers/design-documents/secure-web-proxy
-			const proxyURL =
-				('HTTPS' === type ? 'https' : 'http') + '://' + parts[1];
+			const proxyURL = `${type === 'HTTPS' ? 'https' : 'http'}://${
+				parts[1]
+			}`;
 			const proxyOpts = { ...this.opts, ...parse(proxyURL) };
 			if (secureEndpoint) {
 				return new HttpsProxyAgent(proxyOpts);
@@ -201,6 +204,6 @@ export default class PacProxyAgent extends Agent {
 			return new HttpProxyAgent(proxyOpts);
 		}
 
-		throw new Error('Unknown proxy type: ' + type);
+		throw new Error(`Unknown proxy type: ${type}`);
 	}
 }

@@ -19,7 +19,7 @@ function createPacProxyAgent(
 	opts?: createPacProxyAgent.PacProxyAgentOptions
 ): _PacProxyAgent {
 	// was an options object passed in first?
-	if ('object' === typeof uri) {
+	if (typeof uri === 'object') {
 		opts = uri;
 
 		// result of a url.parse() call?

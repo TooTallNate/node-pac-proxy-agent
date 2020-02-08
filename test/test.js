@@ -2,25 +2,30 @@
  * Module dependencies.
  */
 
-var fs = require('fs');
-var url = require('url');
-var http = require('http');
-var https = require('https');
-var assert = require('assert');
-var getRawBody = require('raw-body');
-var Proxy = require('proxy');
-var socks = require('socksv5');
-var PacProxyAgent = require('../');
+let fs = require('fs');
+let url = require('url');
+let http = require('http');
+let https = require('https');
+let assert = require('assert');
+let getRawBody = require('raw-body');
+let Proxy = require('proxy');
+let socks = require('socksv5');
+let PacProxyAgent = require('../');
 
 describe('PacProxyAgent', function() {
 	// target servers
-	var httpServer, httpPort;
-	var httpsServer, httpsPort;
+	let httpServer;
+	let httpPort;
+	let httpsServer;
+	let httpsPort;
 
 	// proxy servers
-	var socksServer, socksPort;
-	var proxyServer, proxyPort;
-	var proxyHttpsServer, proxyHttpsPort;
+	let socksServer;
+	let socksPort;
+	let proxyServer;
+	let proxyPort;
+	let proxyHttpsServer;
+	let proxyHttpsPort;
 
 	before(function(done) {
 		// setup target HTTP server
@@ -33,9 +38,9 @@ describe('PacProxyAgent', function() {
 
 	before(function(done) {
 		// setup target SSL HTTPS server
-		var options = {
-			key: fs.readFileSync(__dirname + '/ssl-cert-snakeoil.key'),
-			cert: fs.readFileSync(__dirname + '/ssl-cert-snakeoil.pem')
+		let options = {
+			key: fs.readFileSync(`${__dirname}/ssl-cert-snakeoil.key`),
+			cert: fs.readFileSync(`${__dirname}/ssl-cert-snakeoil.pem`)
 		};
 		httpsServer = https.createServer(options);
 		httpsServer.listen(function() {
@@ -67,9 +72,9 @@ describe('PacProxyAgent', function() {
 
 	before(function(done) {
 		// setup SSL HTTPS proxy server
-		var options = {
-			key: fs.readFileSync(__dirname + '/ssl-cert-snakeoil.key'),
-			cert: fs.readFileSync(__dirname + '/ssl-cert-snakeoil.pem')
+		let options = {
+			key: fs.readFileSync(`${__dirname}/ssl-cert-snakeoil.key`),
+			cert: fs.readFileSync(`${__dirname}/ssl-cert-snakeoil.pem`)
 		};
 		proxyHttpsServer = Proxy(https.createServer(options));
 		proxyHttpsServer.listen(function() {
@@ -79,31 +84,31 @@ describe('PacProxyAgent', function() {
 	});
 
 	after(function(done) {
-		//socksServer.once('close', function () { done(); });
+		// socksServer.once('close', function () { done(); });
 		socksServer.close();
 		done();
 	});
 
 	after(function(done) {
-		//httpServer.once('close', function () { done(); });
+		// httpServer.once('close', function () { done(); });
 		httpServer.close();
 		done();
 	});
 
 	after(function(done) {
-		//httpsServer.once('close', function () { done(); });
+		// httpsServer.once('close', function () { done(); });
 		httpsServer.close();
 		done();
 	});
 
 	after(function(done) {
-		//proxyServer.once('close', function () { done(); });
+		// proxyServer.once('close', function () { done(); });
 		proxyServer.close();
 		done();
 	});
 
 	after(function(done) {
-		//proxyHttpsServer.once('close', function () { done(); });
+		// proxyHttpsServer.once('close', function () { done(); });
 		proxyHttpsServer.close();
 		done();
 	});
@@ -124,18 +129,18 @@ describe('PacProxyAgent', function() {
 		}
 		asyncBar.async = true;
 
-		var uri = 'data:,' + encodeURIComponent(FindProxyForURL.toString());
-		var agent = new PacProxyAgent(uri, {
+		let uri = `data:,${encodeURIComponent(FindProxyForURL.toString())}`;
+		let agent = new PacProxyAgent(uri, {
 			sandbox: {
-				foo: foo,
+				foo,
 				bar: asyncBar
 			}
 		});
 
-		var opts = url.parse('http://localhost:' + httpPort + '/test');
+		let opts = url.parse(`http://localhost:${httpPort}/test`);
 		opts.agent = agent;
 
-		var req = http.get(opts);
+		let req = http.get(opts);
 		req.once('error', function(err) {
 			assert.equal(err.message, 'hifooooo');
 			done();
@@ -149,16 +154,16 @@ describe('PacProxyAgent', function() {
 			});
 		});
 		it('should accept a "string" proxy argument', function() {
-			var agent = new PacProxyAgent('pac+ftp://example.com/proxy.pac');
+			let agent = new PacProxyAgent('pac+ftp://example.com/proxy.pac');
 			assert.equal('ftp://example.com/proxy.pac', agent.uri);
 		});
 		it('should accept a `url.parse()` result object argument', function() {
-			var opts = url.parse('pac+ftp://example.com/proxy.pac');
-			var agent = new PacProxyAgent(opts);
+			let opts = url.parse('pac+ftp://example.com/proxy.pac');
+			let agent = new PacProxyAgent(opts);
 			assert.equal('ftp://example.com/proxy.pac', agent.uri);
 		});
 		it('should accept a `uri` on the options object', function() {
-			var agent = new PacProxyAgent({
+			let agent = new PacProxyAgent({
 				uri: 'pac+ftp://example.com/proxy.pac'
 			});
 			assert.equal('ftp://example.com/proxy.pac', agent.uri);
@@ -175,21 +180,19 @@ describe('PacProxyAgent', function() {
 				return 'PROXY localhost:PORT;';
 			}
 
-			var uri =
-				'data:,' +
-				encodeURIComponent(
-					FindProxyForURL.toString().replace('PORT', proxyPort)
-				);
-			var agent = new PacProxyAgent(uri);
+			let uri = `data:,${encodeURIComponent(
+				FindProxyForURL.toString().replace('PORT', proxyPort)
+			)}`;
+			let agent = new PacProxyAgent(uri);
 
-			var opts = url.parse('http://localhost:' + httpPort + '/test');
+			let opts = url.parse(`http://localhost:${httpPort}/test`);
 			opts.agent = agent;
 
-			var req = http.get(opts, function(res) {
+			let req = http.get(opts, function(res) {
 				getRawBody(res, 'utf8', function(err, buf) {
 					if (err) return done(err);
-					var data = JSON.parse(buf);
-					assert.equal('localhost:' + httpPort, data.host);
+					let data = JSON.parse(buf);
+					assert.equal(`localhost:${httpPort}`, data.host);
 					assert('via' in data);
 					done();
 				});
@@ -206,23 +209,21 @@ describe('PacProxyAgent', function() {
 				return 'HTTPS localhost:PORT;';
 			}
 
-			var uri =
-				'data:,' +
-				encodeURIComponent(
-					FindProxyForURL.toString().replace('PORT', proxyHttpsPort)
-				);
-			var proxy = url.parse(uri);
+			let uri = `data:,${encodeURIComponent(
+				FindProxyForURL.toString().replace('PORT', proxyHttpsPort)
+			)}`;
+			let proxy = url.parse(uri);
 			proxy.rejectUnauthorized = false;
-			var agent = new PacProxyAgent(proxy);
+			let agent = new PacProxyAgent(proxy);
 
-			var opts = url.parse('http://localhost:' + httpPort + '/test');
+			let opts = url.parse(`http://localhost:${httpPort}/test`);
 			opts.agent = agent;
 
-			var req = http.get(opts, function(res) {
+			let req = http.get(opts, function(res) {
 				getRawBody(res, 'utf8', function(err, buf) {
 					if (err) return done(err);
-					var data = JSON.parse(buf);
-					assert.equal('localhost:' + httpPort, data.host);
+					let data = JSON.parse(buf);
+					assert.equal(`localhost:${httpPort}`, data.host);
 					assert('via' in data);
 					done();
 				});
@@ -239,21 +240,19 @@ describe('PacProxyAgent', function() {
 				return 'SOCKS localhost:PORT;';
 			}
 
-			var uri =
-				'data:,' +
-				encodeURIComponent(
-					FindProxyForURL.toString().replace('PORT', socksPort)
-				);
-			var agent = new PacProxyAgent(uri);
+			let uri = `data:,${encodeURIComponent(
+				FindProxyForURL.toString().replace('PORT', socksPort)
+			)}`;
+			let agent = new PacProxyAgent(uri);
 
-			var opts = url.parse('http://localhost:' + httpPort + '/test');
+			let opts = url.parse(`http://localhost:${httpPort}/test`);
 			opts.agent = agent;
 
-			var req = http.get(opts, function(res) {
+			let req = http.get(opts, function(res) {
 				getRawBody(res, 'utf8', function(err, buf) {
 					if (err) return done(err);
-					var data = JSON.parse(buf);
-					assert.equal('localhost:' + httpPort, data.host);
+					let data = JSON.parse(buf);
+					assert.equal(`localhost:${httpPort}`, data.host);
 					done();
 				});
 			});
@@ -271,22 +270,20 @@ describe('PacProxyAgent', function() {
 				return 'PROXY localhost:PORT;';
 			}
 
-			var uri =
-				'data:,' +
-				encodeURIComponent(
-					FindProxyForURL.toString().replace('PORT', proxyPort)
-				);
-			var agent = new PacProxyAgent(uri);
+			let uri = `data:,${encodeURIComponent(
+				FindProxyForURL.toString().replace('PORT', proxyPort)
+			)}`;
+			let agent = new PacProxyAgent(uri);
 
-			var opts = url.parse('https://localhost:' + httpsPort + '/test');
+			let opts = url.parse(`https://localhost:${httpsPort}/test`);
 			opts.agent = agent;
 			opts.rejectUnauthorized = false;
 
-			var req = https.get(opts, function(res) {
+			let req = https.get(opts, function(res) {
 				getRawBody(res, 'utf8', function(err, buf) {
 					if (err) return done(err);
-					var data = JSON.parse(buf);
-					assert.equal('localhost:' + httpsPort, data.host);
+					let data = JSON.parse(buf);
+					assert.equal(`localhost:${httpsPort}`, data.host);
 					done();
 				});
 			});
@@ -294,7 +291,7 @@ describe('PacProxyAgent', function() {
 		});
 
 		it('should work over an HTTPS proxy', function(done) {
-			var gotReq = false;
+			let gotReq = false;
 			httpsServer.once('request', function(req, res) {
 				gotReq = true;
 				res.end(JSON.stringify(req.headers));
@@ -304,24 +301,22 @@ describe('PacProxyAgent', function() {
 				return 'HTTPS localhost:PORT;';
 			}
 
-			var uri =
-				'data:,' +
-				encodeURIComponent(
-					FindProxyForURL.toString().replace('PORT', proxyHttpsPort)
-				);
-			var agent = new PacProxyAgent(uri, {
+			let uri = `data:,${encodeURIComponent(
+				FindProxyForURL.toString().replace('PORT', proxyHttpsPort)
+			)}`;
+			let agent = new PacProxyAgent(uri, {
 				rejectUnauthorized: false
 			});
 
-			var opts = url.parse('https://localhost:' + httpsPort + '/test');
+			let opts = url.parse(`https://localhost:${httpsPort}/test`);
 			opts.agent = agent;
 			opts.rejectUnauthorized = false;
 
-			var req = https.get(opts, function(res) {
+			let req = https.get(opts, function(res) {
 				getRawBody(res, 'utf8', function(err, buf) {
 					if (err) return done(err);
-					var data = JSON.parse(buf);
-					assert.equal('localhost:' + httpsPort, data.host);
+					let data = JSON.parse(buf);
+					assert.equal(`localhost:${httpsPort}`, data.host);
 					assert(gotReq);
 					done();
 				});
@@ -330,7 +325,7 @@ describe('PacProxyAgent', function() {
 		});
 
 		it('should work over a SOCKS proxy', function(done) {
-			var gotReq = false;
+			let gotReq = false;
 			httpsServer.once('request', function(req, res) {
 				gotReq = true;
 				res.end(JSON.stringify(req.headers));
@@ -340,22 +335,20 @@ describe('PacProxyAgent', function() {
 				return 'SOCKS localhost:PORT;';
 			}
 
-			var uri =
-				'data:,' +
-				encodeURIComponent(
-					FindProxyForURL.toString().replace('PORT', socksPort)
-				);
-			var agent = new PacProxyAgent(uri);
+			let uri = `data:,${encodeURIComponent(
+				FindProxyForURL.toString().replace('PORT', socksPort)
+			)}`;
+			let agent = new PacProxyAgent(uri);
 
-			var opts = url.parse('https://localhost:' + httpsPort + '/test');
+			let opts = url.parse(`https://localhost:${httpsPort}/test`);
 			opts.agent = agent;
 			opts.rejectUnauthorized = false;
 
-			var req = https.get(opts, function(res) {
+			let req = https.get(opts, function(res) {
 				getRawBody(res, 'utf8', function(err, buf) {
 					if (err) return done(err);
-					var data = JSON.parse(buf);
-					assert.equal('localhost:' + httpsPort, data.host);
+					let data = JSON.parse(buf);
+					assert.equal(`localhost:${httpsPort}`, data.host);
 					assert(gotReq);
 					done();
 				});
