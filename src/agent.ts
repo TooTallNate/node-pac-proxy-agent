@@ -125,7 +125,7 @@ export default class PacProxyAgent extends Agent {
 	async callback(
 		req: ClientRequest,
 		opts: RequestOptions
-	): Promise<net.Socket | Agent> {
+	) {
 		const { secureEndpoint } = opts;
 
 		// First, get a generated `FindProxyForURL()` function,
@@ -171,39 +171,54 @@ export default class PacProxyAgent extends Agent {
 			.split(/\s*;\s*/g)
 			.filter(Boolean);
 
-		// XXX: right now, only the first proxy specified will be used
-		const first = proxies[0];
-		debug('using proxy: %o', first);
+		for (const proxy of proxies) {
+			debug('Attempting to use proxy: %o', proxy);
 
-		const parts = first.split(/\s+/);
-		const type = parts[0];
+			const parts = proxy.split(/\s+/);
+			const type = parts[0];
 
-		if (type === 'DIRECT') {
-			// Direct connection to the destination endpoint
-			if (secureEndpoint) {
-				return tls.connect(opts);
+			if (type === 'DIRECT') {
+				// Direct connection to the destination endpoint
+				if (secureEndpoint) {
+					return tls.connect(opts);
+				}
+				return net.connect(opts);
 			}
-			return net.connect(opts);
-		}
 
-		if (type === 'SOCKS') {
-			// Use a SOCKS proxy
-			return new SocksProxyAgent(`socks://${parts[1]}`);
-		}
-
-		if (type === 'PROXY' || type === 'HTTPS') {
-			// Use an HTTP or HTTPS proxy
-			// http://dev.chromium.org/developers/design-documents/secure-web-proxy
-			const proxyURL = `${type === 'HTTPS' ? 'https' : 'http'}://${
-				parts[1]
-			}`;
-			const proxyOpts = { ...this.opts, ...parse(proxyURL) };
-			if (secureEndpoint) {
-				return new HttpsProxyAgent(proxyOpts);
+			let agent: Agent | null = null;
+			if (type === 'SOCKS' || type === 'SOCKS5') {
+				// Use a SOCKSv5h proxy
+				agent = new SocksProxyAgent(`socks://${parts[1]}`);
 			}
-			return new HttpProxyAgent(proxyOpts);
+
+			if (type === 'SOCKS4') {
+				// Use a SOCKSv4a proxy
+				agent = new SocksProxyAgent(`socks4a://${parts[1]}`);
+			}
+
+			if (type === 'PROXY' || type === 'HTTP' || type === 'HTTPS') {
+				// Use an HTTP or HTTPS proxy
+				// http://dev.chromium.org/developers/design-documents/secure-web-proxy
+				const proxyURL = `${type === 'HTTPS' ? 'https' : 'http'}://${
+					parts[1]
+				}`;
+				const proxyOpts = { ...this.opts, ...parse(proxyURL) };
+				if (secureEndpoint) {
+					agent = new HttpsProxyAgent(proxyOpts);
+				} else {
+					agent = new HttpProxyAgent(proxyOpts);
+				}
+			}
+
+			if (agent) {
+				try {
+					return await agent.callback(req, opts);
+				} catch (err) {
+					debug('Got error for proxy %o: %o', proxy, err);
+				}
+			}
 		}
 
-		throw new Error(`Unknown proxy type: ${type}`);
+		throw new Error(`Failed to establish a socket connection to proxies: ${result}`);
 	}
 }

@@ -258,6 +258,37 @@ describe('PacProxyAgent', function() {
 			});
 			req.once('error', done);
 		});
+
+		it('should fall back to the second proxy if first one fails', function(done) {
+			httpServer.once('request', function(req, res) {
+				res.end(JSON.stringify(req.headers));
+			});
+
+			function FindProxyForURL(url, host) {
+				return 'SOCKS bad-domain:8080; SOCKS localhost:PORT;';
+			}
+
+			let uri = `data:,${encodeURIComponent(
+				FindProxyForURL.toString().replace('PORT', socksPort)
+			)}`;
+			let agent = new PacProxyAgent(uri);
+
+			let opts = url.parse(`http://localhost:${httpPort}/test`);
+			opts.agent = agent;
+
+			let req = http.get(opts, function(res) {
+				getRawBody(res, 'utf8', function(err, buf) {
+					if (err) return done(err);
+					let data = JSON.parse(buf);
+					assert.equal(`localhost:${httpPort}`, data.host);
+					done();
+				});
+			});
+			req.once('error', err => {
+				console.error('req error', err);
+				done(err);
+			});
+		});
 	});
 
 	describe('"https" module', function() {
