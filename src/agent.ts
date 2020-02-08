@@ -134,15 +134,16 @@ export default class PacProxyAgent extends Agent {
 		const resolver = await this.loadResolver();
 
 		// Calculate the `url` parameter
-		let defaultPort = secureEndpoint ? 443 : 80;
+		const defaultPort = secureEndpoint ? 443 : 80;
 		let path = req.path;
+		let search: string | null = null;
 		let firstQuestion = path.indexOf('?');
-		let search;
-		if (firstQuestion === -1) {
+		if (firstQuestion !== -1) {
 			search = path.substring(firstQuestion);
 			path = path.substring(0, firstQuestion);
 		}
-		const url = format({
+
+		const urlOpts = {
 			...opts,
 			protocol: secureEndpoint ? 'https:' : 'http:',
 			pathname: path,
@@ -151,48 +152,48 @@ export default class PacProxyAgent extends Agent {
 			// need to use `hostname` instead of `host` otherwise `port` is ignored
 			hostname: opts.host,
 			host: null,
+			href: null,
 
 			// set `port` to null when it is the protocol default port (80 / 443)
-			port: defaultPort == opts.port ? null : opts.port
-		});
+			port: defaultPort === opts.port ? null : opts.port
+		};
+		const url = format(urlOpts);
 
-		// Calculate the `host` parameter
-		// const host = parse(url).hostname;
-
-		// debug('url: %o, host: %o', url, host);
-		let proxy = await resolver(url);
-		// let proxy = await resolver(url, host);
+		debug('url: %o', url);
+		let result = await resolver(url);
 
 		// Default to "DIRECT" if a falsey value was returned (or nothing)
-		if (!proxy) {
-			proxy = 'DIRECT';
+		if (!result) {
+			result = 'DIRECT';
 		}
 
-		let proxies = String(proxy)
+		const proxies = String(result)
 			.trim()
 			.split(/\s*;\s*/g)
 			.filter(Boolean);
 
 		// XXX: right now, only the first proxy specified will be used
-		let first = proxies[0];
+		const first = proxies[0];
 		debug('using proxy: %o', first);
 
-		let parts = first.split(/\s+/);
-		let type = parts[0];
+		const parts = first.split(/\s+/);
+		const type = parts[0];
 
-		if (type == 'DIRECT') {
-			// direct connection to the destination endpoint
+		if (type === 'DIRECT') {
+			// Direct connection to the destination endpoint
 			if (secureEndpoint) {
 				return tls.connect(opts);
 			}
 			return net.connect(opts);
 		}
-		if (type == 'SOCKS') {
-			// use a SOCKS proxy
+
+		if (type === 'SOCKS') {
+			// Use a SOCKS proxy
 			return new SocksProxyAgent(`socks://${parts[1]}`);
 		}
-		if (type == 'PROXY' || type == 'HTTPS') {
-			// use an HTTP or HTTPS proxy
+
+		if (type === 'PROXY' || type === 'HTTPS') {
+			// Use an HTTP or HTTPS proxy
 			// http://dev.chromium.org/developers/design-documents/secure-web-proxy
 			const proxyURL = `${type === 'HTTPS' ? 'https' : 'http'}://${
 				parts[1]
