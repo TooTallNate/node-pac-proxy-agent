@@ -120,10 +120,8 @@ describe('PacProxyAgent', function () {
       return 'hi';
     }
 
-    function asyncBar(fn) {
-      setTimeout(function () {
-        fn(null, 'fooooo');
-      }, 200);
+    function asyncBar() {
+      return new Promise(r => r('fooooo'));;
     }
     asyncBar.async = true;
 
