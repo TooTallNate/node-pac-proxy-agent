@@ -51,8 +51,8 @@ namespace createPacProxyAgent {
 			HttpProxyAgentOptions,
 			HttpsProxyAgentOptions,
 			SocksProxyAgentOptions {
-				uri?: string;
-			}
+		uri?: string;
+	}
 
 	export type PacProxyAgent = _PacProxyAgent;
 	export const PacProxyAgent = _PacProxyAgent;
