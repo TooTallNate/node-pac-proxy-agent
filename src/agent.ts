@@ -1,16 +1,15 @@
 import net from 'net';
 import tls from 'tls';
 import crypto from 'crypto';
-import { parse } from 'url';
-import { format } from 'url';
 import getUri from 'get-uri';
 import createDebug from 'debug';
 import getRawBody from 'raw-body';
 import { Readable } from 'stream';
-import createPacResolver from 'pac-resolver';
+import { format, parse } from 'url';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { SocksProxyAgent } from 'socks-proxy-agent';
+import createPacResolver, { FindProxyForURL } from 'pac-resolver';
 import { Agent, ClientRequest, RequestOptions } from 'agent-base';
 import { PacProxyAgentOptions } from '.';
 
@@ -34,7 +33,7 @@ export default class PacProxyAgent extends Agent {
 	uri: string;
 	opts: PacProxyAgentOptions;
 	cache?: Readable;
-	resolver?: ReturnType<typeof createPacResolver>;
+	resolver?: FindProxyForURL;
 	resolverHash: string;
 
 	constructor(uri: string, opts: PacProxyAgentOptions = {}) {
@@ -43,7 +42,7 @@ export default class PacProxyAgent extends Agent {
 
 		// Strip the "pac+" prefix
 		this.uri = uri.replace(/^pac\+/i, '');
-		this.opts = opts;
+		this.opts = { ...opts };
 		this.cache = undefined;
 		this.resolver = undefined;
 		this.resolverHash = '';
@@ -61,12 +60,12 @@ export default class PacProxyAgent extends Agent {
 	 * @param {Function} fn callback function
 	 * @api private
 	 */
-	async loadResolver(): Promise<ReturnType<typeof createPacResolver>> {
+	private async loadResolver(): Promise<FindProxyForURL> {
 		try {
 			// (Re)load the contents of the PAC file URI
 			const code = await this.loadPacFile();
 
-			// create a sha1 hash of the JS code
+			// Create a sha1 hash of the JS code
 			const hash = crypto
 				.createHash('sha1')
 				.update(code)
@@ -79,11 +78,11 @@ export default class PacProxyAgent extends Agent {
 				return this.resolver;
 			}
 
-			// cache the resolver
+			// Cache the resolver
 			debug('Creating new proxy resolver instance');
 			this.resolver = createPacResolver(code, this.opts);
 
-			// store that sha1 hash on the resolver instance
+			// Store that sha1 hash on the resolver instance
 			// for future comparison purposes
 			this.resolverHash = hash;
 
@@ -105,11 +104,11 @@ export default class PacProxyAgent extends Agent {
 	 * @param {Function} fn callback function
 	 * @api private
 	 */
-	async loadPacFile(): Promise<string> {
+	private async loadPacFile(): Promise<string> {
 		debug('Loading PAC file: %o', this.uri);
 
 		const rs = await getUri(this.uri, { cache: this.cache });
-		debug('Got stream.Readable instance for URI');
+		debug('Got `Readable` instance for URI');
 		this.cache = rs;
 
 		const buf = await getRawBody(rs);
