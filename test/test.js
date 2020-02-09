@@ -259,18 +259,16 @@ describe('PacProxyAgent', function() {
 			req.once('error', done);
 		});
 
-		it('should fall back to the second proxy if first one fails', function(done) {
+		it('should fall back to the next proxy after one fails', function(done) {
 			httpServer.once('request', function(req, res) {
 				res.end(JSON.stringify(req.headers));
 			});
 
 			function FindProxyForURL(url, host) {
-				return 'SOCKS bad-domain:8080; SOCKS localhost:PORT;';
+				return 'SOCKS bad-domain:8080; HTTP bad-domain:8080; HTTPS bad-domain:8080; DIRECT;';
 			}
 
-			let uri = `data:,${encodeURIComponent(
-				FindProxyForURL.toString().replace('PORT', socksPort)
-			)}`;
+			let uri = `data:,${encodeURIComponent(String(FindProxyForURL))}`;
 			let agent = new PacProxyAgent(uri);
 
 			let opts = url.parse(`http://localhost:${httpPort}/test`);
@@ -284,10 +282,7 @@ describe('PacProxyAgent', function() {
 					done();
 				});
 			});
-			req.once('error', err => {
-				console.error('req error', err);
-				done(err);
-			});
+			req.once('error', done);
 		});
 	});
 
@@ -369,6 +364,36 @@ describe('PacProxyAgent', function() {
 			let uri = `data:,${encodeURIComponent(
 				FindProxyForURL.toString().replace('PORT', socksPort)
 			)}`;
+			let agent = new PacProxyAgent(uri);
+
+			let opts = url.parse(`https://localhost:${httpsPort}/test`);
+			opts.agent = agent;
+			opts.rejectUnauthorized = false;
+
+			let req = https.get(opts, function(res) {
+				getRawBody(res, 'utf8', function(err, buf) {
+					if (err) return done(err);
+					let data = JSON.parse(buf);
+					assert.equal(`localhost:${httpsPort}`, data.host);
+					assert(gotReq);
+					done();
+				});
+			});
+			req.once('error', done);
+		});
+
+		it('should fall back to the next proxy after one fails', function(done) {
+			let gotReq = false;
+			httpsServer.once('request', function(req, res) {
+				gotReq = true;
+				res.end(JSON.stringify(req.headers));
+			});
+
+			function FindProxyForURL(url, host) {
+				return 'SOCKS bad-domain:8080; HTTP bad-domain:8080; HTTPS bad-domain:8080; DIRECT;';
+			}
+
+			let uri = `data:,${encodeURIComponent(String(FindProxyForURL))}`;
 			let agent = new PacProxyAgent(uri);
 
 			let opts = url.parse(`https://localhost:${httpsPort}/test`);
