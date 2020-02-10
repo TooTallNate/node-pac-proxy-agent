@@ -260,8 +260,13 @@ describe('PacProxyAgent', function() {
 		});
 
 		it('should fall back to the next proxy after one fails', function(done) {
+			// This test is slow on Windows :/
+			this.timeout(10000);
+
+			let gotReq = false;
 			httpServer.once('request', function(req, res) {
 				res.end(JSON.stringify(req.headers));
+				gotReq = true;
 			});
 
 			function FindProxyForURL(url, host) {
@@ -279,6 +284,7 @@ describe('PacProxyAgent', function() {
 					if (err) return done(err);
 					let data = JSON.parse(buf);
 					assert.equal(`localhost:${httpPort}`, data.host);
+					assert(gotReq);
 					done();
 				});
 			});
@@ -383,6 +389,9 @@ describe('PacProxyAgent', function() {
 		});
 
 		it('should fall back to the next proxy after one fails', function(done) {
+			// This test is slow on Windows :/
+			this.timeout(10000);
+
 			let gotReq = false;
 			httpsServer.once('request', function(req, res) {
 				gotReq = true;
