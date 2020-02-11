@@ -1,5 +1,6 @@
 import net from 'net';
 import tls from 'tls';
+import once from '@tootallnate/once';
 import crypto from 'crypto';
 import getUri from 'get-uri';
 import createDebug from 'debug';
@@ -10,7 +11,12 @@ import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 import createPacResolver, { FindProxyForURL } from 'pac-resolver';
-import { Agent, ClientRequest, RequestOptions } from 'agent-base';
+import {
+	Agent,
+	AgentCallbackReturn,
+	ClientRequest,
+	RequestOptions
+} from 'agent-base';
 import { PacProxyAgentOptions } from '.';
 
 const debug = createDebug('pac-proxy-agent');
@@ -125,7 +131,7 @@ export default class PacProxyAgent extends Agent {
 	async callback(
 		req: ClientRequest,
 		opts: RequestOptions
-	) {
+	): Promise<AgentCallbackReturn> {
 		const { secureEndpoint } = opts;
 
 		// First, get a generated `FindProxyForURL()` function,
@@ -172,36 +178,30 @@ export default class PacProxyAgent extends Agent {
 			.filter(Boolean);
 
 		for (const proxy of proxies) {
+			let agent: Agent | null = null;
+			let socket: net.Socket | null = null;
+			const [type, target] = proxy.split(/\s+/);
 			debug('Attempting to use proxy: %o', proxy);
-
-			const parts = proxy.split(/\s+/);
-			const type = parts[0];
 
 			if (type === 'DIRECT') {
 				// Direct connection to the destination endpoint
-				if (secureEndpoint) {
-					return tls.connect(opts);
-				}
-				return net.connect(opts);
-			}
-
-			let agent: Agent | null = null;
-			if (type === 'SOCKS' || type === 'SOCKS5') {
+				socket = secureEndpoint ? tls.connect(opts) : net.connect(opts);
+			} else if (type === 'SOCKS' || type === 'SOCKS5') {
 				// Use a SOCKSv5h proxy
-				agent = new SocksProxyAgent(`socks://${parts[1]}`);
-			}
-
-			if (type === 'SOCKS4') {
+				agent = new SocksProxyAgent(`socks://${target}`);
+			} else if (type === 'SOCKS4') {
 				// Use a SOCKSv4a proxy
-				agent = new SocksProxyAgent(`socks4a://${parts[1]}`);
-			}
-
-			if (type === 'PROXY' || type === 'HTTP' || type === 'HTTPS') {
+				agent = new SocksProxyAgent(`socks4a://${target}`);
+			} else if (
+				type === 'PROXY' ||
+				type === 'HTTP' ||
+				type === 'HTTPS'
+			) {
 				// Use an HTTP or HTTPS proxy
 				// http://dev.chromium.org/developers/design-documents/secure-web-proxy
-				const proxyURL = `${type === 'HTTPS' ? 'https' : 'http'}://${
-					parts[1]
-				}`;
+				const proxyURL = `${
+					type === 'HTTPS' ? 'https' : 'http'
+				}://${target}`;
 				const proxyOpts = { ...this.opts, ...parse(proxyURL) };
 				if (secureEndpoint) {
 					agent = new HttpsProxyAgent(proxyOpts);
@@ -210,15 +210,29 @@ export default class PacProxyAgent extends Agent {
 				}
 			}
 
-			if (agent) {
-				try {
-					return await agent.callback(req, opts);
-				} catch (err) {
-					debug('Got error for proxy %o: %o', proxy, err);
+			try {
+				if (socket) {
+					// "DIRECT" connection, wait for connection confirmation
+					await once(socket, 'connect');
+					req.emit('proxy', { proxy, socket });
+					return socket;
 				}
+				if (agent) {
+					const s = await agent.callback(req, opts);
+					req.emit('proxy', { proxy, socket: s });
+					return s;
+				}
+				throw new Error(`Could not determine proxy type for: ${proxy}`);
+			} catch (err) {
+				debug('Got error for proxy %o: %o', proxy, err);
+				req.emit('proxy', { proxy, error: err });
 			}
 		}
 
-		throw new Error(`Failed to establish a socket connection to proxies: ${result}`);
+		throw new Error(
+			`Failed to establish a socket connection to proxies: ${JSON.stringify(
+				proxies
+			)}`
+		);
 	}
 }

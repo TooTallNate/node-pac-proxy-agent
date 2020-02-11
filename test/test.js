@@ -284,10 +284,22 @@ describe('PacProxyAgent', function() {
 					if (err) return done(err);
 					let data = JSON.parse(buf);
 					assert.equal(`localhost:${httpPort}`, data.host);
+					assert.equal(proxyCount, 4);
 					assert(gotReq);
 					done();
 				});
 			});
+
+			let proxyCount = 0;
+			req.on('proxy', function({ proxy, error, socket }) {
+				proxyCount++;
+				if (proxy === 'DIRECT') {
+					assert(socket);
+				} else {
+					assert(error);
+				}
+			});
+
 			req.once('error', done);
 		});
 	});
@@ -414,10 +426,22 @@ describe('PacProxyAgent', function() {
 					if (err) return done(err);
 					let data = JSON.parse(buf);
 					assert.equal(`localhost:${httpsPort}`, data.host);
+					assert.equal(proxyCount, 4);
 					assert(gotReq);
 					done();
 				});
 			});
+
+			let proxyCount = 0;
+			req.on('proxy', function({ proxy, error, socket }) {
+				proxyCount++;
+				if (proxy === 'DIRECT') {
+					assert(socket);
+				} else {
+					assert(error);
+				}
+			});
+
 			req.once('error', done);
 		});
 	});
