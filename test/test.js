@@ -260,9 +260,6 @@ describe('PacProxyAgent', function() {
 		});
 
 		it('should fall back to the next proxy after one fails', function(done) {
-			// This test is slow on Windows :/
-			this.timeout(10000);
-
 			let gotReq = false;
 			httpServer.once('request', function(req, res) {
 				res.end(JSON.stringify(req.headers));
@@ -270,7 +267,7 @@ describe('PacProxyAgent', function() {
 			});
 
 			function FindProxyForURL(url, host) {
-				return 'SOCKS bad-domain:8080; HTTP bad-domain:8080; HTTPS bad-domain:8080; DIRECT;';
+				return 'SOCKS localhost:4; HTTP localhost:4; HTTPS localhost:4; DIRECT;';
 			}
 
 			let uri = `data:,${encodeURIComponent(String(FindProxyForURL))}`;
@@ -389,9 +386,6 @@ describe('PacProxyAgent', function() {
 		});
 
 		it('should fall back to the next proxy after one fails', function(done) {
-			// This test is slow on Windows :/
-			this.timeout(10000);
-
 			let gotReq = false;
 			httpsServer.once('request', function(req, res) {
 				gotReq = true;
@@ -399,7 +393,7 @@ describe('PacProxyAgent', function() {
 			});
 
 			function FindProxyForURL(url, host) {
-				return 'SOCKS bad-domain:8080; HTTP bad-domain:8080; HTTPS bad-domain:8080; DIRECT;';
+				return 'SOCKS localhost:4; HTTP localhost:4; HTTPS localhost:4; DIRECT;';
 			}
 
 			let uri = `data:,${encodeURIComponent(String(FindProxyForURL))}`;
