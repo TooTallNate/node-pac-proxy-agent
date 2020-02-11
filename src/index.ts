@@ -52,6 +52,7 @@ namespace createPacProxyAgent {
 			HttpsProxyAgentOptions,
 			SocksProxyAgentOptions {
 		uri?: string;
+		fallbackToDirect?: boolean;
 	}
 
 	export type PacProxyAgent = _PacProxyAgent;

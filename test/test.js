@@ -290,6 +290,38 @@ describe('PacProxyAgent', function() {
 			});
 			req.once('error', done);
 		});
+
+		it('should support `fallbackToDirect` option', function(done) {
+			// This test is slow on Windows :/
+			this.timeout(10000);
+
+			let gotReq = false;
+			httpServer.once('request', function(req, res) {
+				res.end(JSON.stringify(req.headers));
+				gotReq = true;
+			});
+
+			function FindProxyForURL(url, host) {
+				return 'SOCKS 127.0.0.1:4';
+			}
+
+			const uri = `data:,${encodeURIComponent(String(FindProxyForURL))}`;
+			const agent = new PacProxyAgent(uri, { fallbackToDirect: true });
+
+			const opts = url.parse(`http://localhost:${httpPort}/test`);
+			opts.agent = agent;
+
+			const req = http.get(opts, function(res) {
+				getRawBody(res, 'utf8', function(err, buf) {
+					if (err) return done(err);
+					const data = JSON.parse(buf);
+					assert.equal(`localhost:${httpPort}`, data.host);
+					assert(gotReq);
+					done();
+				});
+			});
+			req.once('error', done);
+		});
 	});
 
 	describe('"https" module', function() {
