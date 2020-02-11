@@ -267,7 +267,7 @@ describe('PacProxyAgent', function() {
 			});
 
 			function FindProxyForURL(url, host) {
-				return 'SOCKS localhost:4; HTTP localhost:4; HTTPS localhost:4; DIRECT;';
+				return 'SOCKS 127.0.0.1:4; HTTP 127.0.0.1:4; HTTPS 127.0.0.1:4; DIRECT;';
 			}
 
 			let uri = `data:,${encodeURIComponent(String(FindProxyForURL))}`;
@@ -393,7 +393,7 @@ describe('PacProxyAgent', function() {
 			});
 
 			function FindProxyForURL(url, host) {
-				return 'SOCKS localhost:4; HTTP localhost:4; HTTPS localhost:4; DIRECT;';
+				return 'SOCKS 127.0.0.1:4; HTTP 127.0.0.1:4; HTTPS 127.0.0.1:4; DIRECT;';
 			}
 
 			let uri = `data:,${encodeURIComponent(String(FindProxyForURL))}`;
