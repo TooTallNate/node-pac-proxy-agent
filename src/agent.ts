@@ -177,6 +177,10 @@ export default class PacProxyAgent extends Agent {
 			.split(/\s*;\s*/g)
 			.filter(Boolean);
 
+		if (this.opts.fallbackToDirect && !proxies.includes('DIRECT')) {
+			proxies.push('DIRECT');
+		}
+
 		for (const proxy of proxies) {
 			let agent: Agent | null = null;
 			let socket: net.Socket | null = null;
