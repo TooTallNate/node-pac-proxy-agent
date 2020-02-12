@@ -63,7 +63,6 @@ export default class PacProxyAgent extends Agent {
 	 * Loads the PAC proxy file from the source if necessary, and returns
 	 * a generated `FindProxyForURL()` resolver function to use.
 	 *
-	 * @param {Function} fn callback function
 	 * @api private
 	 */
 	private async loadResolver(): Promise<FindProxyForURL> {
@@ -107,7 +106,6 @@ export default class PacProxyAgent extends Agent {
 	/**
 	 * Loads the contents of the PAC proxy file.
 	 *
-	 * @param {Function} fn callback function
 	 * @api private
 	 */
 	private async loadPacFile(): Promise<string> {
