@@ -55,6 +55,10 @@ namespace createPacProxyAgent {
 		fallbackToDirect?: boolean;
 	}
 
+	export interface PacProxyError extends NodeJS.ErrnoException {
+		proxy: string;
+	}
+
 	export type PacProxyAgent = _PacProxyAgent;
 	export const PacProxyAgent = _PacProxyAgent;
 

@@ -303,6 +303,44 @@ describe('PacProxyAgent', function() {
 			req.once('error', done);
 		});
 
+		it('should emit an AggregateError if all proxies fail', function(done) {
+			// This test is slow on Windows :/
+			this.timeout(10000);
+
+			let gotReq = false;
+			httpServer.once('request', function(req, res) {
+				res.end(JSON.stringify(req.headers));
+				gotReq = true;
+			});
+
+			function FindProxyForURL(url, host) {
+				return 'SOCKS bad-domain:8080; HTTP bad-domain:8080; HTTPS bad-domain:8080;';
+			}
+
+			let uri = `data:,${encodeURIComponent(String(FindProxyForURL))}`;
+			let agent = new PacProxyAgent(uri);
+
+			let opts = url.parse(`http://localhost:${httpPort}/test`);
+			opts.agent = agent;
+
+			let proxyCount = 0;
+			let req = http.get(opts);
+			req.on('proxy', function({ proxy, error, socket }) {
+				proxyCount++;
+				assert(error);
+				assert(error.message.includes('ENOTFOUND'));
+			});
+			req.once('error', (err) => {
+				assert.equal(err.name, 'AggregateError');
+				const errors = Array.from(err);
+				assert.equal(errors.length, 3);
+				assert(errors[0].message.includes('ENOTFOUND'));
+				assert.equal('ENOTFOUND', errors[1].code);
+				assert.equal('ENOTFOUND', errors[2].code);
+				done();
+			});
+		});
+
 		it('should support `fallbackToDirect` option', function(done) {
 			// This test is slow on Windows :/
 			this.timeout(10000);

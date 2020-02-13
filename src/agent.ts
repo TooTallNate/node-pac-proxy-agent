@@ -7,6 +7,7 @@ import createDebug from 'debug';
 import getRawBody from 'raw-body';
 import { Readable } from 'stream';
 import { format, parse } from 'url';
+import AggregateError from 'aggregate-error';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { SocksProxyAgent } from 'socks-proxy-agent';
@@ -17,7 +18,7 @@ import {
 	ClientRequest,
 	RequestOptions
 } from 'agent-base';
-import { PacProxyAgentOptions } from '.';
+import { PacProxyAgentOptions, PacProxyError } from '.';
 
 const debug = createDebug('pac-proxy-agent');
 
@@ -170,6 +171,7 @@ export default class PacProxyAgent extends Agent {
 			result = 'DIRECT';
 		}
 
+		const errors: PacProxyError[] = [];
 		const proxies = String(result)
 			.trim()
 			.split(/\s*;\s*/g)
@@ -227,14 +229,13 @@ export default class PacProxyAgent extends Agent {
 				throw new Error(`Could not determine proxy type for: ${proxy}`);
 			} catch (err) {
 				debug('Got error for proxy %o: %o', proxy, err);
+				err.message += ` for proxy ${JSON.stringify(proxy)}`;
+				err.proxy = proxy;
+				errors.push(err);
 				req.emit('proxy', { proxy, error: err });
 			}
 		}
 
-		throw new Error(
-			`Failed to establish a socket connection to proxies: ${JSON.stringify(
-				proxies
-			)}`
-		);
+		throw new AggregateError(errors);
 	}
 }
