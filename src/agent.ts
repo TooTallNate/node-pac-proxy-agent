@@ -41,6 +41,7 @@ export default class PacProxyAgent extends Agent {
 	cache?: Readable;
 	resolver?: FindProxyForURL;
 	resolverHash: string;
+	resolverPromise?: Promise<FindProxyForURL>;
 
 	constructor(uri: string, opts: PacProxyAgentOptions = {}) {
 		super(opts);
@@ -52,6 +53,7 @@ export default class PacProxyAgent extends Agent {
 		this.cache = undefined;
 		this.resolver = undefined;
 		this.resolverHash = '';
+		this.resolverPromise = undefined;
 
 		// For `PacResolver`
 		if (!this.opts.filename) {
@@ -59,12 +61,27 @@ export default class PacProxyAgent extends Agent {
 		}
 	}
 
+	private clearResolverPromise = (): void => {
+		this.resolverPromise = undefined;
+	};
+
 	/**
 	 * Loads the PAC proxy file from the source if necessary, and returns
 	 * a generated `FindProxyForURL()` resolver function to use.
 	 *
 	 * @api private
 	 */
+	private getResolver(): Promise<FindProxyForURL> {
+		if (!this.resolverPromise) {
+			this.resolverPromise = this.loadResolver();
+			this.resolverPromise.then(
+				this.clearResolverPromise,
+				this.clearResolverPromise
+			);
+		}
+		return this.resolverPromise;
+	}
+
 	private async loadResolver(): Promise<FindProxyForURL> {
 		try {
 			// (Re)load the contents of the PAC file URI
@@ -87,8 +104,7 @@ export default class PacProxyAgent extends Agent {
 			debug('Creating new proxy resolver instance');
 			this.resolver = createPacResolver(code, this.opts);
 
-			// Store that sha1 hash on the resolver instance
-			// for future comparison purposes
+			// Store that sha1 hash for future comparison purposes
 			this.resolverHash = hash;
 
 			return this.resolver;
@@ -133,14 +149,14 @@ export default class PacProxyAgent extends Agent {
 		const { secureEndpoint } = opts;
 
 		// First, get a generated `FindProxyForURL()` function,
-		// either cached or retreived from the source
-		const resolver = await this.loadResolver();
+		// either cached or retrieved from the source
+		const resolver = await this.getResolver();
 
 		// Calculate the `url` parameter
 		const defaultPort = secureEndpoint ? 443 : 80;
 		let path = req.path;
 		let search: string | null = null;
-		let firstQuestion = path.indexOf('?');
+		const firstQuestion = path.indexOf('?');
 		if (firstQuestion !== -1) {
 			search = path.substring(firstQuestion);
 			path = path.substring(0, firstQuestion);
