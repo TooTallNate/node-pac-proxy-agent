@@ -147,10 +147,16 @@ export default class PacProxyAgent extends Agent {
 		opts: RequestOptions
 	): Promise<AgentCallbackReturn> {
 		const { secureEndpoint } = opts;
+		let resolver = null;
 
 		// First, get a generated `FindProxyForURL()` function,
 		// either cached or retrieved from the source
-		const resolver = await this.getResolver();
+		try {
+			resolver = await this.getResolver();
+		}
+		catch (err) {
+			debug('Error getting resolver: %o', err);
+		}
 
 		// Calculate the `url` parameter
 		const defaultPort = secureEndpoint ? 443 : 80;
@@ -179,7 +185,11 @@ export default class PacProxyAgent extends Agent {
 		const url = format(urlOpts);
 
 		debug('url: %o', url);
-		let result = await resolver(url);
+		let result = null;
+		
+		if (resolver !== null) {
+			result = await resolver(url);
+		}
 
 		// Default to "DIRECT" if a falsey value was returned (or nothing)
 		if (!result) {
