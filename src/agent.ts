@@ -108,7 +108,7 @@ export default class PacProxyAgent extends Agent {
 			this.resolverHash = hash;
 
 			return this.resolver;
-		} catch (err) {
+		} catch (err: any) {
 			if (this.resolver && err.code === 'ENOTMODIFIED') {
 				debug(
 					'Got ENOTMODIFIED response, reusing previous proxy resolver'
