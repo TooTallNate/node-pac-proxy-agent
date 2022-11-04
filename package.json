@@ -40,7 +40,7 @@
     "get-uri": "3",
     "http-proxy-agent": "^4.0.1",
     "https-proxy-agent": "5",
-    "pac-resolver": "^5.0.0",
+    "pac-resolver": "^5.0.1",
     "raw-body": "^2.2.0",
     "socks-proxy-agent": "5"
   },
