@@ -2,7 +2,7 @@ import net from 'net';
 import tls from 'tls';
 import once from '@tootallnate/once';
 import crypto from 'crypto';
-import getUri from 'get-uri';
+import { getUri } from 'get-uri';
 import createDebug from 'debug';
 import getRawBody from 'raw-body';
 import { Readable } from 'stream';

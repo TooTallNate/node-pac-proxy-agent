@@ -1,4 +1,4 @@
-import getUri from 'get-uri';
+import { protocols as gProtocols } from 'get-uri';
 import { format } from 'url';
 import { AgentOptions } from 'agent-base';
 import { PacResolverOptions } from 'pac-resolver';
@@ -61,7 +61,7 @@ namespace createPacProxyAgent {
 	/**
 	 * Supported "protocols". Delegates out to the `get-uri` module.
 	 */
-	export const protocols = Object.keys(getUri.protocols);
+	export const protocols = gProtocols;
 
 	createPacProxyAgent.prototype = _PacProxyAgent.prototype;
 }
