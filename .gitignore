@@ -1,6 +1,0 @@
-/node_modules
-/yarn.lock
-/package-lock.json
-/dist
-/?.?s
-/*.pac
